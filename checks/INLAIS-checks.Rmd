@@ -37,7 +37,7 @@ set.seed(1)
 n.data <- 100
 
 # Number of samples for IS
-n.samples <- 10000
+n.samples <- 100000
 ```
 
 The parameters of the data generating distribution are defined below.
@@ -131,10 +131,9 @@ post.mean
 ## Importance Sampling
 
 
-In this section three scenarios will be explored. The firts one is sampling from
+In this section **four scenarios** will be explored. The first one is sampling from
 the exact posterior. This will yield very similar weights. The second scenario considers a very wide sampling distribution, while the last scenario uses a very narrow sampling distribution. The second scenario should be able to estimate the
-posterior distribution, but very inefficiently (i.e., very small effective sample size). Finally, the third scenario may struggle to estimate the posterior distribution. All the sampling distribution are centered at the actual value of 
-$mu_1$.
+posterior distribution, but very inefficiently (i.e., very small effective sample size). The third scenario may struggle to estimate the posterior distribution. The scond and third scenario have the bivariate normal cetered at the actual value of $mu_1 = (0. 0)^{\top}$ Finally, the fourth scenario uses a sampling distribution with a mean at $(1, 1)^{\top}$.
 
 ```{r}
 # Samples (proposal)
@@ -185,9 +184,12 @@ compute_weights <- function(smps) {
   # n_e_gamma
   n_e_gamma <- (sum(ww^2)^3) / (sum(ww^3)^2)
 
+  # L2 (Elvira et al., 2018)
+  L2 <- sqrt(sum((ww - 1 / length(ww))^2))
+
   return(list(weights = ww, mean = est.means,
     cov = matrix(c(est.vars[1], est.cov, est.cov, est.vars[2]), ncol = 2),
-    n_e = n_e, n_e_sigma = n_e_sigma, n_e_gamma = n_e_gamma))
+    n_e = n_e, n_e_sigma = n_e_sigma, n_e_gamma = n_e_gamma, L2 = L2))
 }
 
 
@@ -203,8 +205,13 @@ print_results <- function(res) {
   print(res$n_e_sigma)
   cat("\nSample size (to estimate the kurtosis)\n")
   print(res$n_e_gamma)
+  cat("\nL2 discrepancy\n")
+  print(res$L2)
 }
 ```
+
+
+### Sampling from the true posterior
 
 ```{r}
 # Samples: true posterior 
@@ -222,9 +229,13 @@ hist(res1$weights, main = "Weights")
 
 ### Sampling from wide proposal
 
+The *wide* proposal is made of using a diagonal matrix which is
+10 times the diagonal of the actual posterior covariance.
+
 ```{r}
-# Samples: true posterior 
-Sigma_wide <- matrix(c(10, 0, 0, 10), ncol = 2)
+# Samples: wide proposal
+#Sigma_wide <- matrix(c(10, 0, 0, 10), ncol = 2)
+Sigma_wide <- 10 * diag(diag(post.covar), 2, 2)
 smps2 <- rmvnorm(n.samples, mean = c(0, 0), sigma = Sigma_wide)
 res2 <- compute_weights(smps2)
 print_results(res2)
@@ -242,12 +253,13 @@ hist(res2$weights, main = "Weights")
 ### Sampling from narrow proposal
 
 
-The *narrow* proposal is made by using a diagonal covriance matrix with
-entires 1/10 in the diagonal.
+The *narrow* proposal is made by using a diagonal covariance matrix with
+entries diagonal of the tru posterior covariance divided by 10.
 
 ```{r}
-# Samples: true posterior 
-Sigma_narrow <- matrix(c(1 / 10, 0, 0, 1 / 10), ncol = 2)
+# Samples: narrow proposal
+#Sigma_narrow <- matrix(c(1 / 10, 0, 0, 1 / 10), ncol = 2)
+Sigma_narrow <- diag(diag(post.covar), 2, 2) / 10
 smps3 <- rmvnorm(n.samples, mean = c(0, 0), sigma = Sigma_narrow)
 res3 <- compute_weights(smps3)
 print_results(res3)
@@ -260,5 +272,73 @@ hist(log(res3$weights), main = "Log-weights")
 hist(res3$weights, main = "Weights")
 ```
 
+### Sampling from *shifted* proposal
 
 
+The *shifted* proposal is made by using a diagonal covariance matrix with
+the entries of the diagonal of the actual posterior covariance and 
+and a mean equal to $(1, 1)^{\top}$ (that 
+*shifts* the proposal distribution).
+
+```{r}
+# Samples: true posterior 
+#Sigma_narrow <- matrix(c(1, 0, 0, 1), ncol = 2)
+Sigma_narrow <- diag(diag(post.covar), 2, 2)
+smps4 <- rmvnorm(n.samples, mean = c(1, 1), sigma = Sigma_narrow)
+res4 <- compute_weights(smps4)
+print_results(res4)
+```
+
+
+```{r fig = TRUE, echo = FALSE}
+par(mfrow = c(1, 2))
+hist(log(res4$weights), main = "Log-weights")
+hist(res4$weights, main = "Weights")
+```
+
+
+
+### Diagnostic plots
+
+
+A diagnostic plot can be computed by estimating the empirical cumulative
+distribution function and comparing to the theoretical *discrete*
+cumulative distribution function. To compute the empirical cumulative
+distribution function we compute the cumulative sum of the weights *after*
+they ahve been reordered using the value of the associated samples. 
+Note that this is a univariate distribution that must be computed for
+each sampled variable.
+
+```{r}
+# Diagnostic plot
+# res: Results from IS
+# smp: Sample (variables by column)
+d_plot <- function(res, smp ) {
+
+  # Number of variables
+  n.var <- ncol(smp)
+  n.samples <- nrow(smp)
+
+  for(i in 1:n.var) {
+    # Reorder weights
+    idx <- order(smp[, i])
+    plot(cumsum(res$weights[idx]), 1:n.samples / n.samples,
+      main = paste0("Variable ", i), type = "l")
+    abline(0, 1, lty = 2)
+  }
+}
+```
+
+```{r fig = TRUE}
+par(mfrow = c(1, 2))
+d_plot(res1, smps1)
+
+par(mfrow = c(1, 2))
+d_plot(res2, smps2)
+
+par(mfrow = c(1, 2))
+d_plot(res3, smps3)
+
+par(mfrow = c(1, 2))
+d_plot(res4, smps4)
+```
