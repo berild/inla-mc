@@ -1,0 +1,257 @@
+---
+title: "Checks and convergence assessment for IS/AMIS with INLA"
+#author: "..."
+date: "9/2/2021" 
+output: html_document
+---
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
+
+
+```{r, include=FALSE}
+# Samples (proposal)
+#smps <- rmvnorm(n.samples, mean = mu2, sigma = Sigma2)
+
+
+# Function to compute the weights
+# smps: Samples, as two-column matrix
+compute_weights <- function(smps, ww) {
+
+  # Summary log-weights
+  #summary(log_w)
+
+  # Re-scale weights
+  ww <- ww / sum(ww)
+
+  # Summary weights
+  #summary(ww)
+
+  #Means
+  est.means <- apply(smps, 2, function(X) { sum(X * ww)})
+  est.means
+  
+  D <- smps - matrix(data=1, nrow=nrow(smps)) %*% est.means
+  cov = t(ww*D) %*% D
+  # Variances
+  #est.vars <- apply(smps, 2, function(X) { sum(X^2*ww) - sum(X * ww)^2})
+  #est.vars
+
+  #Covariance
+  #est.cov <- sum(ww * apply(smps, 1, function(X) {
+  #  (X[1] - est.means[1]) * (X[2] - est.means[2])
+  #}))
+  #est.cov
+
+  # Sample size (to estimate the mean)
+  n_e <- (sum(ww)^2) / sum(ww^2)
+
+  # Sample size (to estimate the variance variance)
+  n_e_sigma <- (sum(ww^2)^2)/(sum(ww^4))
+
+  # Sample size (to estimate the kurtosis)
+  # n_e_gamma
+  n_e_gamma <- (sum(ww^2)^3) / (sum(ww^3)^2)
+
+  # L2 (Elvira et al., 2018)
+  L2 <- sqrt(sum((ww - 1 / length(ww))^2))
+
+  return(list(weights = ww, mean = est.means,
+    cov = cov,
+    n_e = n_e, n_e_sigma = n_e_sigma, n_e_gamma = n_e_gamma, L2 = L2))
+}
+
+
+# Print results
+print_results <- function(res,title=T) {
+  if (title){
+    cat("\nINLA-IS\n")
+  }else{
+     cat("\nINLA-AMIS\n")
+  }
+  cat("\nPosterior means:\n")
+  print(res$mean)
+  cat("\nPosterior covariance:\n")
+  print(res$cov)
+  cat("\nSample size (to estimate the mean)\n")
+  print(res$n_e)
+  cat("\nSample size (to estimate the variance)\n")
+  print(res$n_e_sigma)
+  cat("\nSample size (to estimate the kurtosis)\n")
+  print(res$n_e_gamma)
+  cat("\nL2 discrepancy\n")
+  print(res$L2)
+}
+
+
+# Diagnostic plot
+# res: Results from IS
+# smp: Sample (variables by column)
+d_plot <- function(res, smp, title = T) {
+
+  # Number of variables
+  n.var <- ncol(smp)
+  n.samples <- nrow(smp)
+  if (title){
+    title = "INLA-IS"
+  }else{
+    title = "INLA-AMIS"
+  }
+  for(i in 1:n.var) {
+    # Reorder weights
+    idx <- order(smp[, i])
+    plot(cumsum(res$weights[idx]), 1:n.samples / n.samples,
+      main = paste0(title," Variable ", i), type = "l")
+    abline(0, 1, lty = 2)
+  }
+}
+```
+
+
+
+# Toy
+
+````{r, echo=FALSE}
+load("../sims/toy/toy-is.Rdata")
+load("../sims/toy/toy-amis.Rdata")
+````
+
+<div class="col2">
+```{r,echo=FALSE}
+resIS <- compute_weights(is_w_inla_mod$eta, is_w_inla_mod$weight)
+print_results(resIS)
+```
+
+```{r,echo=FALSE}
+resAMIS <- compute_weights(amis_w_inla_mod$eta, amis_w_inla_mod$weight)
+print_results(resAMIS,title=F)
+```
+</div>
+```{r fig = TRUE, echo = FALSE}
+par(mfrow = c(1, 2))
+hist(log(resIS$weights), main = "INLA-IS Log-weights")
+hist(resIS$weights, main = "INLA-IS Weights")
+hist(log(resAMIS$weights), main = "INLA-AMIS Log-weights")
+hist(resAMIS$weights, main = "INLA-AMIS Weights")
+```
+
+```{r fig = TRUE,echo=FALSE}
+par(mfrow = c(1, 2))
+d_plot(resIS, is_w_inla_mod$eta)
+
+par(mfrow = c(1, 2))
+d_plot(resAMIS, amis_w_inla_mod$eta,title=F)
+```
+
+# Lasso 
+
+
+````{r, echo=FALSE}
+load("../sims/lasso/lasso-is.Rdata")
+load("../sims/lasso/lasso-amis.Rdata")
+````
+
+
+```{r,echo=FALSE}
+resIS <- compute_weights(is_w_inla_mod$eta, is_w_inla_mod$weight)
+print_results(resIS)
+```
+
+```{r,echo=FALSE}
+resAMIS <- compute_weights(amis_w_inla_mod$eta, amis_w_inla_mod$weight)
+print_results(resAMIS,title=F)
+```
+
+```{r fig = TRUE, echo = FALSE}
+par(mfrow = c(1, 2))
+hist(log(resIS$weights), main = "INLA-IS Log-weights")
+hist(resIS$weights, main = "INLA-IS Weights")
+hist(log(resAMIS$weights), main = "INLA-AMIS Log-weights")
+hist(resAMIS$weights, main = "INLA-AMIS Weights")
+```
+
+```{r fig = TRUE,echo=FALSE}
+par(mfrow = c(1, 2))
+d_plot(resIS, is_w_inla_mod$eta)
+
+par(mfrow = c(1, 2))
+d_plot(resAMIS, amis_w_inla_mod$eta,title=F)
+```
+
+# Imputation
+
+````{r, echo=FALSE}
+load("../sims/missing/missing-is.Rdata")
+load("../sims/missing/missing-amis.Rdata")
+````
+
+```{r,echo=FALSE}
+resIS <- compute_weights(is_w_inla_mod$eta, is_w_inla_mod$weight)
+print_results(resIS)
+```
+
+```{r,echo=FALSE}
+resAMIS <- compute_weights(amis_w_inla_mod$eta, amis_w_inla_mod$weight)
+print_results(resAMIS,title=F)
+```
+
+```{r fig = TRUE, echo = FALSE}
+par(mfrow = c(1, 2))
+hist(log(resIS$weights), main = "INLA-IS Log-weights")
+hist(resIS$weights, main = "INLA-IS Weights")
+hist(log(resAMIS$weights), main = "INLA-AMIS Log-weights")
+hist(resAMIS$weights, main = "INLA-AMIS Weights")
+```
+
+```{r fig = TRUE,echo=FALSE}
+par(mfrow = c(1, 2))
+d_plot(resIS, is_w_inla_mod$eta)
+
+par(mfrow = c(1, 2))
+d_plot(resAMIS, amis_w_inla_mod$eta,title=F)
+```
+
+# PQR
+
+````{r, echo=FALSE}
+load("../sims/pqr/pqr-is.Rdata")
+load("../sims/pqr/pqr-amis.Rdata")
+````
+
+<div class="col2">
+```{r,echo=FALSE}
+resIS <- compute_weights(is_w_inla_mod$eta, is_w_inla_mod$weight)
+print_results(resIS)
+```
+
+```{r,echo=FALSE}
+resAMIS <- compute_weights(amis_w_inla_mod$eta, amis_w_inla_mod$weight)
+print_results(resAMIS,title=F)
+```
+</div>
+```{r fig = TRUE, echo = FALSE}
+par(mfrow = c(1, 2))
+hist(log(resIS$weights), main = "INLA-IS Log-weights")
+hist(resIS$weights, main = "INLA-IS Weights")
+hist(log(resAMIS$weights), main = "INLA-AMIS Log-weights")
+hist(resAMIS$weights, main = "INLA-AMIS Weights")
+```
+
+```{r fig = TRUE,echo=FALSE}
+par(mfrow = c(1, 2))
+d_plot(resIS, is_w_inla_mod$eta)
+
+par(mfrow = c(1, 2))
+d_plot(resAMIS, amis_w_inla_mod$eta,title=F)
+```
