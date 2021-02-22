@@ -206,6 +206,22 @@ par(mfrow = c(1, 2))
 d_plot(resAMIS, amis_w_inla_mod$eta,title=F)
 ```
 
+
+### Figure 6
+
+To compare $\beta_4$ and $\beta_5$.
+
+
+```{r fig = TRUE,echo=FALSE}
+par(mfcol = c(2, 2))
+aux <- compute_weights(is_w_inla_mod$eta[, 4:5], is_w_inla_mod$weight) 
+d_plot(aux, is_w_inla_mod$eta[, 4:5])
+aux <- compute_weights(amis_w_inla_mod$eta[, 4:5], amis_w_inla_mod$weight) 
+d_plot(aux, amis_w_inla_mod$eta[, 4:5], title = FALSE)
+```
+
+
+
 # Imputation
 
 ````{r, echo=FALSE}
