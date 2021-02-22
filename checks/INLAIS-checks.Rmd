@@ -187,9 +187,19 @@ compute_weights <- function(smps) {
   # L2 (Elvira et al., 2018)
   L2 <- sqrt(sum((ww - 1 / length(ww))^2))
 
+  # Function-dependent
+  n_e_f <- apply(smps, 2, function(X) {
+    wwtilde <- abs(X) * ww
+    wwtilde <- wwtilde / sum(wwtilde)
+
+    # ESS
+    return(1 / sum(wwtilde^2))
+  })
+
   return(list(weights = ww, mean = est.means,
     cov = matrix(c(est.vars[1], est.cov, est.cov, est.vars[2]), ncol = 2),
-    n_e = n_e, n_e_sigma = n_e_sigma, n_e_gamma = n_e_gamma, L2 = L2))
+    n_e = n_e, n_e_sigma = n_e_sigma, n_e_gamma = n_e_gamma, L2 = L2,
+    n_e_f = n_e_f))
 }
 
 
@@ -207,6 +217,8 @@ print_results <- function(res) {
   print(res$n_e_gamma)
   cat("\nL2 discrepancy\n")
   print(res$L2)
+  cat("\nSample size (per variable)\n")
+  print(res$n_e_f)
 }
 ```
 
@@ -322,8 +334,10 @@ d_plot <- function(res, smp ) {
   for(i in 1:n.var) {
     # Reorder weights
     idx <- order(smp[, i])
-    plot(cumsum(res$weights[idx]), 1:n.samples / n.samples,
-      main = paste0("Variable ", i), type = "l")
+    plot(1:n.samples / n.samples, cumsum(res$weights[idx]),
+      main = paste0("Variable ", i), type = "l",
+      xlab = "Theoretical cumulative distribution",
+      ylab = "Empirical cumulative distribution")
     abline(0, 1, lty = 2)
   }
 }
