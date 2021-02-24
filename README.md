@@ -11,57 +11,8 @@ This repository contains the code used in the Importance Sampling with the Integ
 
 <h3 id "howto"> How to Use:</h3>
 
-<ul class="nav nav-pills nav-justified">
-  <li class="active"><a data-toggle="pill" href="#amis">AMIS-INLA</a></li>
-  <li><a data-toggle="pill" href="#is">IS-INLA</a></li>
-  <li><a data-toggle="pill" href="#mcmc">MCMC-INLA</a></li>
-</ul>
-
-
-<div class="tab-content">
-  <div id="amis" class="tab-pane fade in active">
-    <h3>HOME</h3>
-    <p>Some content.</p>
-  </div>
-  <div id="is" class="tab-pane fade">
-    <h3>Menu 1</h3>
-    <p>Some content in menu 1.</p>
-  </div>
-  <div id="mcmc" class="tab-pane fade">
-    <h3>Menu 2</h3>
-    <p>Some content in menu 2.</p>
-  </div>
-</div>
-
-
 
 <h3 id="examples">Examples</h3>
-
-<ul class="nav nav-pills nav-justified">
-  <li class="active"><a data-toggle="pill" href="#toy">Bivariate linear model</a></li>
-  <li><a data-toggle="pill" href="#lasso">Bayesian lasso</a></li>
-  <li><a data-toggle="pill" href="#missing">Imputation</a></li>
-  <li><a data-toggle="pill" href="#pqr">Quantile regression</a></li>
-</ul>
-
-
-<div class="tab-content">
-  <div id="toy" class="tab-pane fade in active">
-    <h3>HOME</h3>
-    <p>Some content.</p>
-  </div>
-  <div id="lasso" class="tab-pane fade">
-    <h3>Menu 1</h3>
-    <p>Some content in menu 1.</p>
-  </div>
-  <div id="missing" class="tab-pane fade">
-    <h3>Menu 2</h3>
-    <p>Some content in menu 2.</p>
-  </div>
-  <div id="pqr" class="tab-pane fade">
-    ### Bayesian parametric quantile regression
-  </div>
-</div>
 
 <details>
   <summary id="blm" style ="cursor: pointer; font-size: 1.5em;">Bivariate linear model (click to view)</summary>
