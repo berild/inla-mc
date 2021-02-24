@@ -14,31 +14,29 @@ gg_color_hue <- function(n) {
 col_temp = gg_color_hue(4)
 
 p1 <- ggplot() +
-  geom_line(data = amis_w_inla_mod$margs$intercept, aes(x=x,y=y, color = "AMIS with INLA")) +
-  geom_line(data = is_w_inla_mod$margs$intercept, aes(x=x,y=y, color = "IS with INLA")) +
-  geom_line(data = mcmc_w_inla_mod$margs$intercept, aes(x=x,y=y, color = "MCMC with INLA")) +
-  geom_line(data = data.frame(inla_mod$marginals.fixed$`(Intercept)`),aes(x=x,y=y,color = "INLA")) +
-  geom_vline(data = data.frame(x = 1), aes(xintercept = 1, linetype = "Truth")) +
-  scale_linetype_manual(values= "dotdash") +
-  scale_color_manual(values = col_temp) +
+  geom_line(data = amis_w_inla_mod$margs$intercept, aes(x=x,y=y, linetype = "A")) +
+  geom_line(data = is_w_inla_mod$margs$intercept, aes(x=x,y=y, linetype = "B")) +
+  geom_line(data = mcmc_w_inla_mod$margs$intercept, aes(x=x,y=y, linetype = "C")) +
+  geom_line(data = data.frame(inla_mod$marginals.fixed$`(Intercept)`),aes(x=x,y=y,linetype = "D")) +
+  geom_vline(data = data.frame(x = 1), aes(xintercept = 1),color = "salmon3") +
+  scale_linetype_manual(values = c(1,2,3,4),labels = c("AMIS-INLA","IS-INLA","MCMC-INLA","INLA")) +
   labs(color = "", x = expression(beta[0]),y="",linetype = "")+
   theme_bw() +
-  coord_cartesian(xlim = c(-0.5,2.5))+
-  theme(legend.position="bottom",plot.title = element_text(hjust = 0.5))
+  coord_cartesian(xlim = c(0,2))+
+  theme(legend.position="none",plot.title = element_text(hjust = 0.5))
 p1
 
 p2 <- ggplot() +
-  geom_line(data = amis_w_inla_mod$margs$tau, aes(x=x,y=y, color = "AMIS with INLA")) +
-  geom_line(data = is_w_inla_mod$margs$tau, aes(x=x,y=y, color = "IS with INLA")) +
-  geom_line(data = is_w_inla_mod$margs$tau, aes(x=x,y=y, color = "MCMC with INLA")) +
-  geom_line(data = data.frame(inla_mod$marginals.hyperpar$`Precision for the Gaussian observations`),aes(x=x,y=y,color = "INLA")) +
-  geom_vline(data = data.frame(x = 1), aes(xintercept = 1, linetype = "Truth")) +
+  geom_line(data = amis_w_inla_mod$margs$tau, aes(x=x,y=y,linetype = "A")) +
+  geom_line(data = is_w_inla_mod$margs$tau, aes(x=x,y=y,linetype = "B")) +
+  geom_line(data = is_w_inla_mod$margs$tau, aes(x=x,y=y,linetype = "C")) +
+  geom_line(data = data.frame(inla_mod$marginals.hyperpar$`Precision for the Gaussian observations`),aes(x=x,y=y,linetype = "D")) +
+  geom_vline(data = data.frame(x = .11), aes(xintercept = 1), color = "salmon3") +
+  scale_linetype_manual(values = c(1,2,3,4),labels = c("AMIS-INLA","IS-INLA","MCMC-INLA","INLA")) +
   labs(color = "", x = expression(tau),y="",linetype = "")+
-  scale_linetype_manual(values= "dotdash") +
   theme_bw() +
-  scale_color_manual(values = col_temp) +
-  coord_cartesian(xlim = c(0.3,2.5))+
-  theme(legend.position="bottom")
+  coord_cartesian(xlim = c(0.35,2))+
+  theme(legend.position="none",plot.title = element_text(hjust = 0.5))
 p2
 
 amis_w_inla_mod$eta_uni_kerns = lapply(seq(ncol(amis_w_inla_mod$eta)), function(x){
@@ -73,30 +71,28 @@ save(mcmc_w_inla_mod,file="./sims/toy/toy-mcmc-w-inla.Rdata")
 
 
 p3 <- ggplot() +
-  geom_line(data = amis_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="AMIS with INLA")) +
-  geom_line(data = is_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="IS with INLA")) +
-  geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,color="MCMC with INLA")) +
-  geom_line(data = data.frame(inla_mod$marginals.fixed$x1),aes(x=x,y=y,color = "INLA")) +
-  geom_vline(data = data.frame(x = 1), aes(xintercept = 1, linetype = "Truth")) +
-  scale_linetype_manual(values= "dotdash") +
+  geom_line(data = amis_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,linetype="A")) +
+  geom_line(data = is_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,linetype="B")) +
+  geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[1]], aes(x=x,y=y,linetype="C")) +
+  geom_line(data = data.frame(inla_mod$marginals.fixed$x1),aes(x=x,y=y,linetype = "D")) +
+  geom_vline(data = data.frame(x = 1), aes(xintercept = 1), color = "salmon3") +
   labs(color = "", x = expression(beta[1]),y="",linetype = "") +
-  scale_color_manual(values =col_temp) +
+  scale_linetype_manual(values = c(1,2,3,4),labels = c("AMIS-INLA","IS-INLA","MCMC-INLA","INLA")) +
   coord_cartesian(xlim = c(-0.5,2.5))+
   theme_bw() +
-  theme(legend.position="bottom")
+  theme(legend.position="none",plot.title = element_text(hjust = 0.5))
 p3
 p4 <- ggplot() +
-  geom_line(data = amis_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="AMIS with INLA")) +
-  geom_line(data = is_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="IS with INLA")) +
-  geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,color="MCMC with INLA")) +
-  geom_line(data = data.frame(inla_mod$marginals.fixed$x2),aes(x=x,y=y,color = "INLA")) +
-  geom_vline(data = data.frame(x = 1), aes(xintercept = -1, linetype = "Truth")) +
-  scale_linetype_manual(values= "dotdash") +
+  geom_line(data = amis_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,linetype="A")) +
+  geom_line(data = is_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,linetype="B")) +
+  geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[2]], aes(x=x,y=y,linetype="C")) +
+  geom_line(data = data.frame(inla_mod$marginals.fixed$x2),aes(x=x,y=y,linetype = "D")) +
+  geom_vline(data = data.frame(x = 1), aes(xintercept = -1), color = "salmon3") +
   labs(color = "", x = expression(beta[2]),y="",linetype = "") +
-  scale_color_manual(values = col_temp) +
+  scale_linetype_manual(values = c(1,2,3,4),labels = c("AMIS-INLA","IS-INLA","MCMC-INLA","INLA")) +
   coord_cartesian(xlim = c(-2.5,0.5))+
   theme_bw() +
-  theme(legend.position="bottom")
+  theme(legend.position="none",plot.title = element_text(hjust = 0.5))
 p4
 
 ggarrange(p1,p2,p3,p4,ncol=2, nrow=2, common.legend = T,legend="bottom",labels = c("a", "b","c","d"),font.label = list(size = 10))
@@ -108,10 +104,11 @@ cont1 <- ggplot() +
   geom_contour(data = is_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, linetype = "IS with INLA"),bins = nbin,color="black") +
   geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, linetype = "MCMC with INLA"),bins = nbin,color="black") +
   labs(linetype="",color = "",x=expression(beta[1]),y=expression(beta[2]),linetype="") +
+  geom_point(data = data.frame(x = 1,y = -1), aes(x=x,y=y), shape = 4, stroke = 2,size = 3,color = "salmon3") +
   theme_bw() +
-  scale_linetype_manual(values = linestyles[c(2,3,7)]) +
+  scale_linetype_manual(values = c(1,2,3)) +
   coord_cartesian(xlim = c(0,2),ylim=c(-2,0)) +
-  theme(legend.position="bottom")
+  theme(legend.position="none",plot.title = element_text(hjust = 0.5))
 cont1
 
 cont2 <- ggplot() +
@@ -119,10 +116,11 @@ cont2 <- ggplot() +
   geom_contour(data = is_w_inla_mod$eta_joint_kern, aes(x = x, y = y, z = z, linetype = "IS with INLA"),bins = nbin,color="black") +
   geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, linetype = "MCMC with INLA"),bins = nbin,color="black") +
   labs(linetype="",color = "",x=expression(beta[1]),y=expression(beta[2]),linetype="") +
+  geom_point(data = data.frame(x = 1,y = -1), aes(x=x,y=y), shape = 4, stroke = 2,size = 3,color = "salmon3") +
   theme_bw() +
-  scale_linetype_manual(values = linestyles[c(2,3,7)]) +
+  scale_linetype_manual(values = c(1,2,3)) +
   coord_cartesian(xlim = c(0,2),ylim=c(-2,0)) +
-  theme(legend.position="bottom")
+  theme(legend.position="none",plot.title = element_text(hjust = 0.5))
 cont2
 
 cont3 <- ggplot() +
@@ -130,10 +128,11 @@ cont3 <- ggplot() +
   geom_contour(data = is_w_inla_mod$eta_joint_kern, aes(x = x+100, y = y+100, z = z, linetype = "IS with INLA"),bins = nbin,color="black") +
   geom_contour(data = mcmc_w_inla_mod$eta_joint_kern, aes(x = x, y = y, z = z, linetype = "MCMC with INLA"),bins = nbin,color="black") +
   labs(linetype="",color = "",x=expression(beta[1]),y=expression(beta[2]),linetype="") +
+  geom_point(data = data.frame(x = 1,y = -1), aes(x=x,y=y), shape = 4, stroke = 2,size = 3,color = "salmon3") +
   theme_bw() +
-  scale_linetype_manual(values = linestyles[c(2,3,7)]) +
+  scale_linetype_manual(values = c(1,2,3)) +
   coord_cartesian(xlim = c(0,2),ylim=c(-2,0)) +
-  theme(legend.position="bottom")
+  theme(legend.position="none",plot.title = element_text(hjust = 0.5))
 cont3
 
 essp <- ggplot() +
@@ -141,11 +140,11 @@ essp <- ggplot() +
   geom_line(data = is_w_inla_mod$ess,aes(x=time,y=ess,linetype = "IS with INLA")) +
   geom_line(data = mcmc_w_inla_mod$ess,aes(x=time,y=ess,linetype = "MCMC with INLA")) +
   scale_x_continuous(labels = c("0 sec", "1 min", "5 min", "20 min", "1 h"),trans="log",breaks=c(0,60,60*5,60*20,60*60)) +
-  labs(linetype = "",color = "",x="Runtime",y="ESS") +
+  labs(linetype = "",color = "",x="Runtime",y="Effective sample size") +
   theme_bw() +
   coord_cartesian(xlim = c(10,60*70)) +
-  scale_linetype_manual(values = linestyles[c(2,3,7)]) +
-  theme(legend.position="bottom")
+  scale_linetype_manual(values = c(1,2,3)) +
+  theme(legend.position="none",plot.title = element_text(hjust = 0.5))
 essp
 
 ggarrange(cont1,cont2,cont3,essp,ncol=2, nrow=2, common.legend = T,legend="bottom",labels = c("a", "b","c","d"),font.label = list(size = 10))
@@ -190,13 +189,13 @@ amis_adaptive2 = lapply(seq(7), function(x){
 })
 
 p1amis <- ggplot() +
-  geom_polygon(data = amis_adaptive2[[1]],aes(x=y,y=x,fill = "target")) +
-  geom_polygon(data = amis_adaptive2[[2]],aes(x=y,y=x,fill = "target")) +
-  geom_polygon(data = amis_adaptive2[[3]],aes(x=y,y=x,fill = "target")) +
-  geom_polygon(data = amis_adaptive2[[4]],aes(x=y,y=x,fill = "target")) +
-  geom_polygon(data = amis_adaptive2[[5]],aes(x=y,y=x,fill = "target")) +
-  geom_polygon(data = amis_adaptive2[[6]],aes(x=y,y=x,fill = "target")) +
-  geom_polygon(data = amis_adaptive2[[7]],aes(x=y,y=x,fill = "target")) +
+  geom_polygon(data = amis_adaptive2[[1]],aes(x=y,y=x,fill = "target"),alpha=0.7) +
+  geom_polygon(data = amis_adaptive2[[2]],aes(x=y,y=x,fill = "target"),alpha=0.7) +
+  geom_polygon(data = amis_adaptive2[[3]],aes(x=y,y=x,fill = "target"),alpha=0.7) +
+  geom_polygon(data = amis_adaptive2[[4]],aes(x=y,y=x,fill = "target"),alpha=0.7) +
+  geom_polygon(data = amis_adaptive2[[5]],aes(x=y,y=x,fill = "target"),alpha=0.7) +
+  geom_polygon(data = amis_adaptive2[[6]],aes(x=y,y=x,fill = "target"),alpha=0.7) +
+  geom_polygon(data = amis_adaptive2[[7]],aes(x=y,y=x,fill = "target"),alpha=0.7) +
   geom_path(data = amis_adaptive[[1]],aes(x=y,y=x, color = "proposal")) +
   geom_path(data = amis_adaptive[[2]],aes(x=y,y=x, color = "proposal")) +
   geom_path(data = amis_adaptive[[3]],aes(x=y,y=x, color = "proposal")) +
@@ -204,13 +203,13 @@ p1amis <- ggplot() +
   geom_path(data = amis_adaptive[[5]],aes(x=y,y=x, color = "proposal")) +
   geom_path(data = amis_adaptive[[6]],aes(x=y,y=x, color = "proposal")) +
   geom_path(data = amis_adaptive[[7]],aes(x=y,y=x, color = "proposal")) +
-  scale_color_manual(values = col_temp[1]) +
-  scale_fill_manual(values = col_temp[3]) +
+  scale_color_manual(values = "black") +
+  scale_fill_manual(values = "salmon3") +
   coord_cartesian(ylim = c(-6,6))+
   scale_x_continuous(label = T_s - 1, breaks = seq(7)) +
-  labs(x = "t",y = expression(beta[1]),color="",fill="",title="AMIS with INLA") +
+  labs(x = "Number of adaptations",y = expression(beta[1]),color="",fill="",title="AMIS-INLA") +
   theme_bw() +
-  theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
+  theme(plot.title = element_text(size=8,vjust=-8,hjust=0.1),panel.grid.minor = element_blank(),legend.position = "none",panel.grid.major.y = element_blank())
 p1amis
 
 amis_adaptive21 = lapply(seq(7), function(x){
@@ -246,9 +245,9 @@ p2amis <-ggplot() +
   scale_fill_manual(values = col_temp[3]) +
   coord_cartesian(ylim = c(-6,6))+
   scale_x_continuous(label = T_s-1, breaks = seq(7)) +
-  labs(x = "t",y = expression(beta[2]),color="",fill="",title="AMIS with INLA") +
+  labs(x = "Adaptations",y = expression(beta[2]),color="",fill="",title="AMIS with INLA") +
   theme_bw() +
-  theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
+  theme(plot.title = element_text(size=7,vjust=-8,hjust=0.2),panel.grid.minor = element_blank())
 p2amis
 
 is_adaptive = lapply(seq(2), function(x){
@@ -265,17 +264,17 @@ is_adaptive2 = lapply(seq(2), function(x){
   data.frame(x=tmp,y=y)
 })
 p1is <-ggplot() +
-  geom_polygon(data = is_adaptive2[[1]],aes(x=y,y=x,fill = "target")) +
-  geom_polygon(data = is_adaptive2[[2]],aes(x=y,y=x,fill = "target")) +
-  geom_path(data = is_adaptive[[1]],aes(x=y,y=x, color = "proposal")) +
-  geom_path(data = is_adaptive[[2]],aes(x=y,y=x, color = "proposal")) +
-  scale_color_manual(values = col_temp[1]) +
-  scale_fill_manual(values = col_temp[3]) +
+  geom_polygon(data = is_adaptive2[[1]],aes(x=y,y=x,fill = "target"),alpha = 0.7) +
+  geom_polygon(data = is_adaptive2[[2]],aes(x=y,y=x,fill = "target"),alpha = 0.7) +
+  geom_path(data = is_adaptive[[1]],aes(x=y,y=x, color = "proposal"),linetype=2) +
+  geom_path(data = is_adaptive[[2]],aes(x=y,y=x, color = "proposal"),linetype=2) +
+  scale_color_manual(values = "black") +
+  scale_fill_manual(values = "salmon3") +
   scale_x_continuous(label = seq(2)-1, breaks = seq(2)) +
-  coord_cartesian(ylim = c(-6,6))+
-  labs(color="",fill="",x="t",y = expression(beta[1]),title="IS with INLA") +
+  coord_cartesian(ylim = c(-6,6),xlim=c(0,3.5))+
+  labs(color="",fill="",x="Number of adaptations",y = expression(beta[1]),title="IS-INLA") +
   theme_bw()+
-  theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
+  theme(plot.title = element_text(size=8,vjust=-8,hjust=0.1),panel.grid.minor = element_blank(),legend.position = "none",panel.grid.major.y = element_blank())
 p1is
 
 is_adaptive21 = lapply(seq(2), function(x){
@@ -301,7 +300,7 @@ p2is <-ggplot() +
   scale_fill_manual(values = col_temp[3]) +
   scale_x_continuous(label = seq(2)-1, breaks = seq(2)) +
   labs(color="",fill="",x="t",y = expression(beta[2]),title="IS with INLA") +
-  coord_cartesian(ylim = c(-6,6))+
+  coord_cartesian(ylim = c(-6,6),xlim=c(-2,4))+
   theme_bw()+
   theme(plot.title = element_text(size=7,vjust=-8,hjust=0.01))
 p2is
