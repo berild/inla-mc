@@ -1,10 +1,10 @@
 # main MCMC with INLA algorithm
 inlaMH <- function(data, init, prior, d.prop, r.prop, fit.inla,
                     n.samples = 100, n.burnin = 5, n.thin = 1,kde = T){
-  eta = matrix(data = NA,nrow = n.samples, ncol = length(init$mu))
+  eta = matrix(data = NA,nrow = n.samples, ncol = length(init[[1]]))
   mlik = numeric(n.samples)
   acc.vec = numeric(n.samples)
-  eta[1,] = init$mu
+  eta[1,] = init[[1]]
   mod.curr = fit.inla(data=data, eta = eta[1,])
   mlik[1] = mod.curr$mlik
   starttime = Sys.time()
@@ -13,19 +13,20 @@ inlaMH <- function(data, init, prior, d.prop, r.prop, fit.inla,
   N_marg = floor((n.samples - n.burnin)/n.thin)
   times = numeric(N_marg)
   margs = NA
+  res = list()
   for (i in seq(2,n.samples)){
     setTxtProgressBar(pb, i)
     INLA_crash = T
     while(INLA_crash){
       tryCatch({
-        eta.new = r.prop(eta = eta[i-1,], sigma = init$cov)
+        eta.new = r.prop(eta[i-1,], sigma = init[[2]])
         mod.new = fit.inla(data = data,eta = eta.new)
         INLA_crash = F
       },error=function(e){
       },finally={})
     }
-    lacc1 = mod.new$mlik + prior(eta.new) + d.prop(eta.new, eta[i-1,],init$cov)
-    lacc2 = mod.curr$mlik + prior(eta[i-1,]) + d.prop(eta[i-1,], eta.new,init$cov)
+    lacc1 = mod.new$mlik + prior(eta.new) + d.prop(eta.new, eta[i-1,],init[[2]])
+    lacc2 = mod.curr$mlik + prior(eta[i-1,]) + d.prop(eta[i-1,], eta.new,init[[2]])
     acc = min(1,exp(lacc1 - lacc2))
     if (runif(1) < acc){
       eta[i,] = eta.new
