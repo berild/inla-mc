@@ -50,7 +50,7 @@ prior.x.mis <- function(x, mu = mean(d.mis$bmi, na.rm = TRUE),
   }
 }
 
-
+mc
 dq.x.mis <- function(y, x, sigma = sqrt(5), log =TRUE) {
   sum(dnorm(x, mean = y, sd = sqrt(5), log = log))
 }
@@ -59,16 +59,16 @@ rq.x.mis <- function(x, sigma = sqrt(5)) {
   rnorm(length(x), mean = x, sd = sqrt(5))
 }
 
-# ### AMIS
-# amis_mod <- inlaAMIS(data = df, init = init, prior.x.mis,
-#                                dq.x.mis, rq.x.mis, fit.inla,
-#                               N_t = seq(25,50,1)*10, N_0 = 250,ncores= 10)
-# save(amis_mod, file = "./missing//missing-amis.Rdata")
-#
-# ### IS
-# is_mod <- inlaIS(data = df, init = init, prior.x.mis,
-#                            dq.x.mis, rq.x.mis,fit.inla, N_0 = 800, N = 10000,ncores = 10)
-# save(is_mod, file = "./missing//missing-is.Rdata")
+### AMIS
+amis_mod <- inlaAMIS(data = df, init = init, prior.x.mis,
+                               dq.x.mis, rq.x.mis, fit.inla,
+                              N_t = seq(25,50,1)*10, N_0 = 250,ncores= 10)
+save(amis_mod, file = "./missing//missing-amis.Rdata")
+
+### IS
+is_mod <- inlaIS(data = df, init = init, prior.x.mis,
+                           dq.x.mis, rq.x.mis,fit.inla, N_0 = 800, N = 10000,ncores = 10)
+save(is_mod, file = "./missing//missing-is.Rdata")
 
 ### MCMC
 mcmc_mod <- inlaMH(data = df, init =init,
