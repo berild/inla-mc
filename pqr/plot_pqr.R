@@ -70,16 +70,9 @@ mcmc_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(mcmc_w_inla_mod$eta)), function(x
 })
 mcmc_w_inla_mod$mod$range = amis_w_inla_mod$mod$range*amis_w_inla_mod$scale[1]
 
-p1 <- ggplot() +
-  geom_line(data = as.data.frame(amis_w_inla_mod$margs$intercept), aes(x=x,y=y,linetype="AMIS with INLA")) +
-  geom_line(data = as.data.frame(is_w_inla_mod$margs$intercept),aes(x=x,y=y,linetype="IS with INLA")) +
-  geom_line(data = as.data.frame(mcmc_w_inla_mod$margs$intercept), aes(x=x,y=y,linetype="MCMC with INLA")) +
-  labs(y = "",x=expression(mu[0]),linetype = "") +
-  scale_linetype_manual(values = c(1,2,3))+
-  coord_cartesian(xlim =c(-0.32,-0.26)) +
-  theme_bw() +
-  theme(legend.position="none")
-p1
+amis_w_inla_mod$ess = running.ESS(amis_w_inla_mod$eta, amis_w_inla_mod$times,ws =  amis_w_inla_mod$weight, norm = T)
+is_w_inla_mod$ess = running.ESS(is_w_inla_mod$eta, is_w_inla_mod$times,ws =  is_w_inla_mod$weight, norm = T)
+
 p2 <- ggplot() +
   geom_line(data = as.data.frame(amis_w_inla_mod$margs$prec.range), aes(x=x,y=y,linetype="AMIS with INLA")) +
   geom_line(data = as.data.frame(is_w_inla_mod$margs$prec.range), aes(x=x,y=y,linetype="IS with INLA")) +
@@ -89,30 +82,60 @@ p2 <- ggplot() +
   scale_linetype_manual(values = c(1,2,3))+
   coord_cartesian(xlim=c(0,0.1)) +
   theme(legend.position="none")
-p2
 
+plot_uni <- function(){
+  height = 3
+  width = 5
+  p1 <- ggplot() +
+    geom_line(data = as.data.frame(amis_w_inla_mod$margs$intercept), aes(x=x,y=y,linetype="AMIS with INLA")) +
+    geom_line(data = as.data.frame(is_w_inla_mod$margs$intercept),aes(x=x,y=y,linetype="IS with INLA")) +
+    geom_line(data = as.data.frame(mcmc_w_inla_mod$margs$intercept), aes(x=x,y=y,linetype="MCMC with INLA")) +
+    labs(y = "",x=expression(mu[0]),linetype = "",title = "a") +
+    scale_linetype_manual(values = c(1,2,3))+
+    coord_cartesian(xlim =c(-0.32,-0.26)) +
+    theme_bw() +
+    theme(legend.position="none",plot.title = element_text(face = "bold",hjust = -0.02,size = 12),axis.title.y = element_blank(), axis.title.x = element_text(size=14))
 
-p3 <- ggplot() +
-  geom_line(data = amis_w_inla_mod$eta_uni_kerns[[1]],aes(x=x,y=y,linetype="AMIS with INLA")) +
-  geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[1]],aes(x=x,y=y,linetype="MCMC with INLA")) +
-  geom_line(data = is_w_inla_mod$eta_uni_kerns[[1]],aes(x=x,y=y,linetype="IS with INLA")) +
-  labs(y="",x = expression(alpha),linetype = "") +
-  scale_linetype_manual(values = c(1,2,3))+
-  theme_bw() +
-  coord_cartesian(xlim=c(11.5,16)) +
-  theme(legend.position="none")
-p3
+  p3 <- ggplot() +
+    geom_line(data = amis_w_inla_mod$eta_uni_kerns[[1]],aes(x=x,y=y,linetype="AMIS with INLA")) +
+    geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[1]],aes(x=x,y=y,linetype="MCMC with INLA")) +
+    geom_line(data = is_w_inla_mod$eta_uni_kerns[[1]],aes(x=x,y=y,linetype="IS with INLA")) +
+    labs(y="",x = expression(alpha),linetype = "",title="b") +
+    scale_linetype_manual(values = c(1,2,3))+
+    theme_bw() +
+    coord_cartesian(xlim=c(11.5,16)) +
+    theme(legend.position="none",plot.title = element_text(face = "bold",hjust = -0.02,size = 12),axis.title.y = element_blank(), axis.title.x = element_text(size=14))
+  p4 <- ggplot() +
+    geom_line(data = amis_w_inla_mod$eta_uni_kerns[[2]],aes(x=x,y=y,linetype="AMIS with INLA")) +
+    geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[2]],aes(x=x,y=y,linetype="MCMC with INLA")) +
+    geom_line(data = is_w_inla_mod$eta_uni_kerns[[2]],aes(x=x,y=y,linetype="IS with INLA")) +
+    labs(y= "",x = expression(beta),linetype = "",title = "c") +
+    scale_linetype_manual(values = c(1,2,3))+
+    coord_cartesian(xlim=c(-0.018,-0.010)) +
+    theme_bw() +
+    theme(legend.position="none",plot.title = element_text(face = "bold",hjust = -0.02,size = 12),axis.title.y = element_blank(), axis.title.x = element_text(size=14))
+  essp <- ggplot() +
+    geom_line(data = amis_w_inla_mod$ess,aes(x=time,y=ess,linetype = "AMIS with INLA")) +
+    geom_line(data = is_w_inla_mod$ess,aes(x=time,y=ess,linetype = "IS with INLA")) +
+    geom_line(data = mcmc_w_inla_mod$ess,aes(x=time,y=ess,linetype = "MCMC with INLA")) +
+    scale_x_continuous(labels = c("0 sec", "1 min", "5 min", "20 min", "1 h","2h"),trans="log",breaks=c(0,60,60*5,60*20,60*60,2*60*60)) +
+    labs(linetype = "",color = "",x="Runtime",y="Effective sample size",title="d") +
+    theme_bw() +
+    coord_cartesian(xlim = c(10,2*60*70)) +
+    scale_linetype_manual(values = c(1,2,3)) +
+    theme(legend.position="none",plot.title = element_text(face = "bold",hjust = -0.02,size = 12), axis.title = element_text(size=14))
+  ggsave(filename = "pqr_uni_intercept.pdf", plot = p1, device = NULL, path = "./figures/pqr/",
+         scale = 1, width = width, height = height, units = "in", dpi=5000)
+  ggsave(filename = "pqr_uni_alpha.pdf", plot = p3, device = NULL, path = "./figures/pqr/",
+         scale = 1, width = width, height = height, units = "in", dpi=5000)
+  ggsave(filename = "pqr_uni_beta.pdf", plot = p4, device = NULL, path = "./figures/pqr/",
+         scale = 1, width = width, height = height, units = "in", dpi=5000)
+  ggsave(filename = "pqr_uni_ess.pdf", plot = essp, device = NULL, path = "./figures/pqr/",
+         scale = 1, width = width, height = height, units = "in", dpi=5000)
+  return(list(p1,p3,p4,essp))
+}
+plot_uni()
 
-p4 <- ggplot() +
-  geom_line(data = amis_w_inla_mod$eta_uni_kerns[[2]],aes(x=x,y=y,linetype="AMIS with INLA")) +
-  geom_line(data = mcmc_w_inla_mod$eta_uni_kerns[[2]],aes(x=x,y=y,linetype="MCMC with INLA")) +
-  geom_line(data = is_w_inla_mod$eta_uni_kerns[[2]],aes(x=x,y=y,linetype="IS with INLA")) +
-  labs(y= "",x = expression(beta),linetype = "") +
-  scale_linetype_manual(values = c(1,2,3))+
-  coord_cartesian(xlim=c(-0.018,-0.010)) +
-  theme_bw() +
-  theme(legend.position="none")
-p4
 eta_joint_kern_amis = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 200, lims = c(11,16,-0.018,-0.009))
 amis_w_inla_mod$eta_joint_kern = data.frame(expand.grid(x=eta_joint_kern_amis$x, y=eta_joint_kern_amis$y), z=as.vector(eta_joint_kern_amis$z))
 
@@ -256,21 +279,6 @@ p7 <- ggplot()+
   guides(color=F,linetype=F) +
   theme_bw()
 p7
-
-amis_w_inla_mod$ess = running.ESS(amis_w_inla_mod$eta, amis_w_inla_mod$times,ws =  amis_w_inla_mod$weight, norm = T)
-is_w_inla_mod$ess = running.ESS(is_w_inla_mod$eta, is_w_inla_mod$times,ws =  is_w_inla_mod$weight, norm = T)
-mcmc_w_inla_mod$ess = running.ESS(mcmc_w_inla_mod$eta, mcmc_w_inla_mod$times)
-essp <- ggplot() +
-  geom_line(data = amis_w_inla_mod$ess,aes(x=time,y=ess,linetype = "AMIS with INLA")) +
-  geom_line(data = is_w_inla_mod$ess,aes(x=time,y=ess,linetype = "IS with INLA")) +
-  geom_line(data = mcmc_w_inla_mod$ess,aes(x=time,y=ess,linetype = "MCMC with INLA")) +
-  scale_x_continuous(labels = c("0 sec", "1 min", "5 min", "20 min", "1 h"),trans="log",breaks=c(0,60,60*5,60*20,60*60)) +
-  labs(linetype = "",color = "",x="Runtime",y="Effective sample size") +
-  theme_bw() +
-  coord_cartesian(xlim = c(10,60*70)) +
-  scale_linetype_manual(values = c(1,2,3)) +
-  theme(legend.position="none")
-essp
 
 calc.post.sd(mcmc_w_inla_mod$eta)
 
