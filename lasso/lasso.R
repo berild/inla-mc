@@ -91,26 +91,26 @@ prior.beta <- function(x, mu = 0, lambda = 0.073, log = TRUE) {
   return(res)
 }
 
-# dq.beta <- function(y, x, sigma = stdev.samp, log =TRUE) {
-#   #dmvnorm(y,mean = x, sigma = sigma,log = log)
-#   dmvt(y,delta=x,sigma=sigma,df=3,log=log,type = "shifted")
-# }
-#
-# rq.beta <- function(x, sigma = stdev.samp) {
-#   #rmvnorm(1,mean=x,sigma = sigma)
-#   as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
-# }
-#
-#
-# ### AMIS
-# amis_mod = inlaAMIS(data = df, init = list(mu = rep(0,n.beta), cov = 4*stdev.samp),
-#                     prior.beta, dq.beta, rq.beta, fit.inla, N_t = seq(25,50,1), N_0 = 25,ncores = 10)
-# save(amis_mod, file = "./lasso/lasso-amis-w-inla.Rdata")
-#
-# ### IS
-# is_mod = inlaIS(data = df, init = list(mu = rep(0,n.beta), cov = 4*stdev.samp),
-#                           prior.beta, dq.beta, rq.beta, fit.inla, N_0 = 800, N = 10000,ncores = 10)
-# save(is_mod, file = "./lasso/lasso-is.Rdata")
+dq.beta <- function(y, x, sigma = stdev.samp, log =TRUE) {
+  #dmvnorm(y,mean = x, sigma = sigma,log = log)
+  dmvt(y,delta=x,sigma=sigma,df=3,log=log,type = "shifted")
+}
+
+rq.beta <- function(x, sigma = stdev.samp) {
+  #rmvnorm(1,mean=x,sigma = sigma)
+  as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
+}
+
+
+### AMIS
+amis_mod = inlaAMIS(data = df, init = list(mu = rep(0,n.beta), cov = 4*stdev.samp),
+                    prior.beta, dq.beta, rq.beta, fit.inla, N_t = seq(25,50,1), N_0 = 25,ncores = 10)
+save(amis_mod, file = "./lasso/lasso-amis-w-inla.Rdata")
+
+### IS
+is_mod = inlaIS(data = df, init = list(mu = rep(0,n.beta), cov = 4*stdev.samp),
+                          prior.beta, dq.beta, rq.beta, fit.inla, N_0 = 800, N = 10000,ncores = 10)
+save(is_mod, file = "./lasso/lasso-is.Rdata")
 
 
 
