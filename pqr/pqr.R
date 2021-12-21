@@ -3,14 +3,8 @@ library(Brq)
 library(INLA)
 library(SemiPar)
 
-# loading general functions
-source("./genFuncs.R")
-# loading amis with inla functions
-source("./inlaAMIS.R")
-# loading is with inla functions
-source("./inlaIS.R")
-# loading mcmc with inla functions
-source("./inlaMH.R")
+# sourcing INLA-IS, INLA-AMIS and INLA-MH code
+source("./inlaMC/inlaMC.R")
 
 # function fitting conditional models with INLA with gamma likelihood
 fit.inla.ggamma <- function(data,eta){
@@ -73,19 +67,19 @@ prior.param <- function(x, log = TRUE) {
   sum(dnorm(x, 0, 100, log = log))
 }
 
+# changing intital proposal distribution amis and is
+init = list(mu = c(10,-10),cov = 3*diag(2))
+
 # proposal distribution amis and is
-dq.param <- function(y, x, sigma = init$cov, log =TRUE) {
-  mvtnorm::dmvt(y,sigma = sigma, df=3, delta = x, type = "shifted",log=log)
+dq.param <- function(y, theta = init, log =TRUE) {
+  mvtnorm::dmvt(y,sigma = theta[[2]], df=3, delta = theta[[1]], type = "shifted",log=log)
   #dmvnorm(y, mean = x, sigma = sigma, log = log)
 }
 
-rq.param <- function(x, sigma = init$cov) {
-  as.vector(mvtnorm::rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
+rq.param <- function(theta=init) {
+  as.vector(mvtnorm::rmvt(1,sigma = theta[[2]], df=3, delta = theta[[1]], type = "shifted"))
   #as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
-
-
-
 
 # Lidar data
 data(lidar)
@@ -94,24 +88,22 @@ r_max = max(lidar$range)
 r_min = min(lidar$range)
 lidar$range = lidar$range/r_max
 
-# changing intital proposal distribution amis and is
-init = list(mu = c(10,-10),cov = 3*diag(2))
 
 # running amis with inla on lidar data
-amis_w_inla_mod = amis.w.inla(data = lidar, init = init, prior.param,
+amis_mod = inlaAMIS(data = lidar, init = init, prior.param,
                               dq.param, rq.param, fit.inla.rw2,
-                              N_t = seq(25,50,1)*10, N_0 = 250,kde = T)
+                              N_t = seq(25,50,1)*10, N_0 = 250,ncores = 10)
 amis_w_inla_mod$mod = lidar
 amis_w_inla_mod$scale = c(r_max,r_min)
-save(amis_w_inla_mod, file = "./sims/pqr-gaussian-lidar-amis-w-inla.Rdata")
+save(amis_w_inla_mod, file = "./sims/pqr/amis_pqr_rw2.Rdata")
 
 # running is with inla on lidar data
-is_w_inla_mod = is.w.inla(data = lidar, init = init, prior.param,
+is_mod = inlaIS(data = lidar, init = init, prior.param,
                           dq.param, rq.param, fit.inla.rw2,
-                          N_0 = 800, N = 10000)
+                          N_0 = 800, N = 10000,ncores = 10)
 is_w_inla_mod$mod = lidar
 is_w_inla_mod$scale = c(r_max,r_min)
-save(is_w_inla_mod, file = "./sims/pqr-gaussian-lidar-is-w-inla.Rdata")
+save(is_w_inla_mod, file = "./sims/pqr/is_pqr_rw2.Rdata")
 
 # initalizing proposal distribution for mcmc with inla
 init_mcmc = list(mu = c(0,0),cov = diag(2))
@@ -123,10 +115,10 @@ rq.param.mcmc  <- function(x, sigma = init$cov) {
   as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 # running mcmc with inla on lidar data
-mcmc_w_inla_mod <- mcmc.w.inla(data = lidar, init = init_mcmc,
+mcmc_mod <- inlaMH(data = lidar, init = init_mcmc,
                                prior.param, dq.param.mcmc, rq.param.mcmc, fit.inla.rw2,
                                n.samples = 10500, n.burnin = 500, n.thin = 1)
-save(mcmc_w_inla_mod, file = "./sims/pqr-gaussian-lidar-mcmc-w-inla.Rdata")
+save(mcmc_w_inla_mod, file = "./sims/pqr/mcmc_pqr_rw2.Rdata")
 eta_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1,nrow(mcmc_w_inla_mod$eta))/nrow(mcmc_w_inla_mod$eta), n = 100, lims = c(-1,1,-1,1))
 mcmc_w_inla_mod$eta_kern_joint = data.frame(expand.grid(x=eta_kern_mcmc$x, y=eta_kern_mcmc$y), z=as.vector(eta_kern_mcmc$z))
 mcmc_w_inla_mod$eta_uni_kerns= lapply(seq(ncol(mcmc_w_inla_mod$eta)), function(x){

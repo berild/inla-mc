@@ -1,12 +1,9 @@
-library(parallel)
 library(mvtnorm)
 library(MASS)
 library(INLA)
 
-source("./genFuncs.R")
-source("./inlaIS.R")
-source("./inlaAMIS.R")
-source("./inlaMH.R")
+# sourcing INLA-IS, INLA-AMIS and INLA-MH code
+source("./inlaMC/inlaMC.R")
 
 # function to sample data
 sample.linreg <- function(){
@@ -24,11 +21,11 @@ df = sample.linreg()
 
 # fit the exact inla model
 inla_mod = inla(y~x, data=df) 
-save(inla_mod, file = "./toy/toy-inla.Rdata")
+save(inla_mod, file = "./sims/toy/inla-toy.Rdata")
 
 # inla function fitting conditional LGMs in the combined methods
-fit.inla <- function(data, beta){
-  data$oset = data$x%*%t(beta)
+fit.inla <- function(data, eta){
+  data$oset = data$x%*%t(eta)
   res = inla(y~1+offset(oset), data = data)
   return(list(mlik = res$mlik[1],
               dists = list(intercept = res$marginals.fixed[[1]], 
@@ -46,11 +43,12 @@ prior.beta <- function(x, sigma = sqrt(1/.001), log = TRUE) {
 init = list(mu = c(0,0),cov = diag(5,2,2))
 
 # proposal distribution in AMIS and IS
-rq.beta <- function(x, sigma = diag(5,2,2)) {
-  rmvnorm(1,mean=x,sigma = sigma)
+rq.beta <- function(theta = init) {
+  rmvnorm(1,mean=theta[[1]],sigma = theta[[2]])
 }
-dq.beta <- function(y, x, sigma = diag(5,2,2), log =TRUE) {
-  dmvnorm(y,mean = x, sigma = sigma,log = log)
+
+dq.beta <- function(y, theta = init, t = 1, log =TRUE) {
+  dmvnorm(y,mean = theta[[1]], sigma = theta[[2]],log = log)
 }
 
 ### AMIS
@@ -58,13 +56,13 @@ dq.beta <- function(y, x, sigma = diag(5,2,2), log =TRUE) {
 amis_mod <- inlaAMIS(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla,
                                N_t = seq(25,50)*10, N_0 = 250,ncores = 10)
-save(amis_mod, file = "./toy/toy-amis.Rdata")
+save(amis_mod, file = "./sims/toy/toy-amis.Rdata")
 
 ### IS
 
 is_mod <- inlaIS(data = df, init = init, prior.beta,
                            dq.beta, rq.beta, fit.inla, N_0 = 800, N = 10000,ncores = 10)
-save(is_mod, file = "./toy/toy-is.Rdata")
+save(is_mod, file = "./sims/toy/toy-is.Rdata")
 
 ### MCMC
 
@@ -81,4 +79,4 @@ init = list(mu = c(0,0),cov = 0.5*diag(2))
 
 mcmc_mod <- inlaMH(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla, n.samples = 10500, n.burnin = 500, n.thin = 1)
-save(mcmc_w_inla_mod, file = "./toy/toy-mcmc.Rdata")
+save(mcmc_w_inla_mod, file = "./sims/toy/toy-mcmc.Rdata")

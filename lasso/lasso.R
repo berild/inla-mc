@@ -2,18 +2,12 @@
 library(INLA)
 library(ISLR)
 library(glmnet)
+library(INLA)
 library(smoothmest)
 library(mvtnorm)
 
-
-# loading general functions
-source("./genFuncs.R")
-# loading amis with inla functions
-source("./inlaAMIS.R")
-# loading is with inla functions
-source("./inlaIS.R")
-# loading mcmc with inla functions
-source("./inlaMH.R")
+# sourcing INLA-IS, INLA-AMIS and INLA-MH code
+source("./inlaMC/inlaMC.R")
 
 data(Hitters)
 
@@ -41,7 +35,6 @@ ml = summary(lm(y~-1 + x, data = df))$coefficients[,1:2]
 set.seed(1)
 train <- sample(1:nrow(x), nrow(x)/2)
 test <- (-train)
-
 
 #Grid for lambda parameter in lasso
 grid <- 10^seq(10, -2, length = 100)
@@ -90,28 +83,30 @@ prior.beta <- function(x, mu = 0, lambda = 0.073, log = TRUE) {
 
   return(res)
 }
-
-dq.beta <- function(y, x, sigma = stdev.samp, log =TRUE) {
+# initial parameters of the proposal distribution
+init = list(mu = rep(0,n.beta), cov = 4*stdev.samp)
+# proposal distribution
+## evaluate
+dq.beta <- function(y, theta = init, log =TRUE) {
   #dmvnorm(y,mean = x, sigma = sigma,log = log)
-  dmvt(y,delta=x,sigma=sigma,df=3,log=log,type = "shifted")
+  dmvt(y,delta=theta[[1]],sigma=theta[[2]],df=3,log=log,type = "shifted")
 }
-
-rq.beta <- function(x, sigma = stdev.samp) {
+## sample
+rq.beta <- function(theta) {
   #rmvnorm(1,mean=x,sigma = sigma)
-  as.vector(rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted"))
+  as.vector(rmvt(1,sigma = theta[[2]], df=3, delta = theta[[1]], type = "shifted"))
 }
 
 
 ### AMIS
-amis_mod = inlaAMIS(data = df, init = list(mu = rep(0,n.beta), cov = 4*stdev.samp),
-                    prior.beta, dq.beta, rq.beta, fit.inla, N_t = seq(25,50,1), N_0 = 25,ncores = 10)
-save(amis_mod, file = "./lasso/lasso-amis-w-inla.Rdata")
+amis_mod = inlaAMIS(data = df, init = init, prior.beta, dq.beta, 
+                    rq.beta, fit.inla, N_t = seq(25,50,1), N_0 = 25,ncores = 10)
+save(amis_mod, file = "./sims/lasso/amis_lasso.Rdata")
 
 ### IS
 is_mod = inlaIS(data = df, init = list(mu = rep(0,n.beta), cov = 4*stdev.samp),
                           prior.beta, dq.beta, rq.beta, fit.inla, N_0 = 800, N = 10000,ncores = 10)
-save(is_mod, file = "./lasso/lasso-is.Rdata")
-
+save(is_mod, file = "./sims/lasso/is_lasso.Rdata")
 
 
 ### MCMC
@@ -127,5 +122,5 @@ rq.beta <- function(x, sigma = stdev.samp) {
 mcmc_mod = inlaMH(data = df, init = list(mu = rep(x=0,ncol(df$x)),cov = stdev.samp),
                               prior.beta, dq.beta, rq.beta, fit.inla,
                               n.samples = 10500, n.burnin = 500, n.thin = 1)
-save(mcmc_mod, file = "./lasso/lasso-mcmc-w-inla.Rdata")
+save(mcmc_mod, file = "./sims/lasso/mcmc_lasso.Rdata")
 
