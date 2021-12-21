@@ -185,7 +185,7 @@ save(is_mod, file = "./sims/pois-mix/is_pois_mix.Rdata")
 # AMIS-INLA call
 set.seed(1)
 amis_mod <- inlaAMIS(d, init=init, prior = prior, d.prop = dq.prop, r.prop = rq.prop,
-                     fit.inla=fit.inla, N_t = rep(2000, 4), N_0 = 2000, ncores = 60)
+                     fit.inla=fit.inla, N_t = rep(20, 4), N_0 = 10, ncores = 60)
 save(amis_mod, file = "./sims/pois-mix/amis_pois_mix.Rdata")
 
 sessionInfo()

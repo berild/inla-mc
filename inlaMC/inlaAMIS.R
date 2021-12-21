@@ -32,21 +32,16 @@ par.amis <- function(x,data, theta, t, N_0, N_t, N_tmp,
   INLA_crash = TRUE
   while(INLA_crash){
     tryCatch({
-      if (t==0){
-        eta = r.prop(theta)
-      }else{
-        eta = r.prop(theta[[t+1]]) 
-      }
+      eta = r.prop(theta[[t+1]]) 
       mod = fit.inla(data ,eta)
       INLA_crash = F
     },error=function(e){
+      system("echo 'Encoutered error in r.prop or fit.inla'")
     },finally={})
   }
   if (t==0){
-    #delta = N_0*d.prop(y = eta, x = theta$a.mu[1,], sigma = theta$a.cov[,,1], log = FALSE)
-    delta = N_0*d.prop(eta, theta, log = FALSE)
-    #weight = mod$mlik + prior(eta) - d.prop(y = eta, x = theta$a.mu[1,], sigma = theta$a.cov[,,1])
-    weight = mod$mlik + prior(eta) - d.prop(eta, theta)
+    delta = N_0*d.prop(eta, theta[[1]], log = FALSE)
+    weight = mod$mlik + prior(eta) - d.prop(eta, theta[[1]])
   }else{
     #delta = N_0*d.prop(y = eta, x = theta$a.mu[1,], sigma = theta$a.cov[,,1],log = FALSE) + calc.delta(N_t,eta,theta, t, d.prop)
     delta = N_0*d.prop(eta, theta[[1]], log = FALSE) + calc.delta(N_t,eta,theta, t, d.prop)
@@ -70,8 +65,9 @@ inlaAMIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = seq(25,5
   delta = numeric(N_tot)
   weight = numeric(N_tot)
   times = numeric(N_tot)
-  theta = init
-  n_eta = length(r.prop(theta))
+  theta  = list()
+  theta[[1]] = init
+  n_eta = length(r.prop(theta[[1]]))
   eta = matrix(NA, ncol = n_eta, nrow = N_tot)
   i_tot = 0
   pb <- txtProgressBar(min = 0, max = N_tot, style = 3)
@@ -96,11 +92,11 @@ inlaAMIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = seq(25,5
     times[i_tot] = as.numeric(difftime(ele$times,starttime,units = "secs"))
 
   }
-  theta = list(theta,calc.theta(list(weight,eta,margs),i_tot))
+  theta[[2]] = calc.theta(list(weight,eta,margs),i_tot)
   # adaptive importance sampling
   for (t in seq(length(N_t))){
     N_tmp = N_tmp + N_t[t]
-    amis.list = parallel::mclapply(seq(N_t[t]),function(x){#
+    amis.list = parallel::mclapply(seq(N_t[t]),function(x){
       par.amis(x, data, theta, t, N_0,
                N_t, N_tmp, prior, d.prop,
                r.prop, fit.inla)
@@ -126,7 +122,7 @@ inlaAMIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = seq(25,5
                                        d.prop)
     delta[1:(N_tmp - N_t[t])] = delta.weight$delta
     weight[1:(N_tmp - N_t[t])] = delta.weight$weight
-    theta = list(theta,calc.theta(list(weight,eta,margs),i_tot))
+    theta[[t+2]] = calc.theta(list(weight,eta,margs),i_tot)
   }
   res$eta = eta
   res$times = times

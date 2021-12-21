@@ -2,22 +2,15 @@
 par.is <- function(x, data, theta, t, prior, d.prop, r.prop, fit.inla){
   INLA_crash = T
   while(INLA_crash){
-    tryCatch({
-      if (t==1){
-        eta = r.prop(theta)
-      }else{
-        eta = r.prop(theta[[2]]) 
-      }
+    tryCatch({ 
+      eta = r.prop(theta[[t]]) 
       mod = fit.inla(data ,eta)
       INLA_crash = F
     },error=function(e){
+      system("echo 'Encoutered error in r.prop or fit.inla'")
     },finally={})
   }
-  if (t==1){
-    weight = mod$mlik + prior(eta) - d.prop(eta, theta)
-  }else{
-    weight = mod$mlik + prior(eta) - d.prop(eta, theta[[2]])
-  }
+  weight = mod$mlik + prior(eta) - d.prop(eta, theta[[t]])
   return(list(mlik = mod$mlik, dists = mod$dists, eta = eta, weight = weight, times = Sys.time()))
 }
 
@@ -26,7 +19,8 @@ inlaIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = NA, N = 40
   if (ncores>parallel::detectCores()){
     ncores = parallel::detectCores()
   }
-  theta = init
+  theta = list()
+  theta[[1]] = init
   starttime = Sys.time()
   times = numeric(N)
   res = list()
@@ -34,7 +28,7 @@ inlaIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = NA, N = 40
   n_eta = length(r.prop(theta))
   if (anyNA(N_0)){
     pb <- txtProgressBar(min = 0, max = N, style = 3)
-    theta = list(theta, init)
+    theta[[2]] = init
     N_0 = 0
   }else{
     pb <- txtProgressBar(min = 0, max = N+N_0, style = 3)
@@ -49,7 +43,7 @@ inlaIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = NA, N = 40
       weight[i] = is.list[[i]]$weight
       margs = store.post(is.list[[i]]$dists,margs,i,N)
     }
-    theta = list(theta,calc.theta(list(weight,eta,margs),N_0))
+    theta[[2]] = calc.theta(list(weight,eta,margs),N_0)
   }
   margs = NA
   
