@@ -1,0 +1,12 @@
+model {
+  for(i in 1:n) {
+    y[i] ~ dpois(mu[z[i]])
+    z[i] ~ dcat(c(0.5, 0.5))
+  }
+
+  mu[1] <- exp(logmu[1])
+  mu[2] <- exp(logmu[2])
+  logmu[1] ~ dnorm(log(10), 0.01)
+  logmu[2] ~ dnorm(log(30), 0.01)
+} 
+

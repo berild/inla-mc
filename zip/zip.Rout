@@ -1,0 +1,50 @@
+
+R version 3.6.3 (2020-02-29) -- "Holding the Windsock"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R es un software libre y viene sin GARANTIA ALGUNA.
+Usted puede redistribuirlo bajo ciertas circunstancias.
+Escriba 'license()' o 'licence()' para detalles de distribucion.
+
+R es un proyecto colaborativo con muchos contribuyentes.
+Escriba 'contributors()' para obtener más información y
+'citation()' para saber cómo citar R o paquetes de R en publicaciones.
+
+Escriba 'demo()' para demostraciones, 'help()' para el sistema on-line de ayuda,
+o 'help.start()' para abrir el sistema de ayuda HTML con su navegador.
+Escriba 'q()' para salir de R.
+
+> # Fit ZIP models with INLA and IS
+> 
+> library(INLA)
+Loading required package: Matrix
+Loading required package: sp
+Loading required package: parallel
+Loading required package: foreach
+This is INLA_20.12.10 built 2020-12-11 15:12:36 UTC.
+ - See www.r-inla.org/contact-us for how to get help.
+ - To enable PARDISO sparse library; see inla.pardiso()
+> library(pscl)
+Classes and Methods for R developed in the
+Political Science Computational Laboratory
+Department of Political Science
+Stanford University
+Simon Jackman
+hurdle and zeroinfl functions by Achim Zeileis
+> library(mvtnorm)
+> 
+> # Load data
+> # https://fukamilab.github.io/BIO202/04-C-zero-data.html#zero-inflated_poisson_glm
+> #OBFL <- read.csv('OBFL.csv', header = TRUE)
+> 
+> # Load data
+> # https://stats.idre.ucla.edu/r/dae/zip/
+> #zinb <- read.csv("https://stats.idre.ucla.edu/stat/data/fish.csv")
+> zinb <- read.csv("./zip/fish.csv")
+Error in file(file, "rt") : no se puede abrir la conexión
+Calls: read.csv -> read.table -> file
+Además: Warning message:
+In file(file, "rt") :
+  no fue posible abrir el archivo './zip/fish.csv': No such file or directory
+Ejecución interrumpida

@@ -1,0 +1,20 @@
+model {
+
+  for(i in 1:N) {
+    count[i] ~ dpois(lambda[i])
+    lambda[i] <- mu[i] * (1 - z[i]) + 0.000001
+
+    z[i] ~ dbern(p[i])
+
+    logit(p[i]) <- gamma[1] + gamma[2] * persons[i]
+
+    log(mu[i]) <- beta[1] + beta[2] * child[i] + beta[3] * camper[i]
+  }
+
+  gamma[1] ~ dnorm(0, 0.001)
+  beta[1] ~ dnorm(0, 0.001)
+  gamma[2] ~ dnorm(0, 0.001)
+  beta[2] ~ dnorm(0, 0.001)
+  beta[3] ~ dnorm(0, 0.001)
+
+}
