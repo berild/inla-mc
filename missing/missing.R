@@ -58,17 +58,20 @@ rq.x.mis <- function(theta) {
 }
 
 ### AMIS
+set.seed(1)
 amis_mod <- inlaAMIS(data = df, init = init, prior.x.mis,
                                dq.x.mis, rq.x.mis, fit.inla,
                               N_t = seq(25,50,1)*10, N_0 = 250,ncores= 10)
 save(amis_mod, file = "./sims/missing/amis-missing.Rdata")
 
 ### IS
+set.seed(1)
 is_mod <- inlaIS(data = df, init = init, prior.x.mis,
                            dq.x.mis, rq.x.mis,fit.inla, N_0 = 800, N = 10000,ncores = 10)
 save(is_mod, file = "./sims/missing/is-missing.Rdata")
 
 ### MCMC
+set.seed(1)
 mcmc_mod <- inlaMH(data = df, init =init,
                                prior.x.mis, dq.x.mis, rq.x.mis, fit.inla,
                                n.samples = 10500, n.burnin = 500, n.thin = 1)

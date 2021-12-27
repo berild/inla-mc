@@ -99,11 +99,13 @@ rq.beta <- function(theta) {
 
 
 ### AMIS
+set.seed(1)
 amis_mod = inlaAMIS(data = df, init = init, prior.beta, dq.beta, 
-                    rq.beta, fit.inla, N_t = seq(25,50,1), N_0 = 25,ncores = 10)
+                    rq.beta, fit.inla, N_t = seq(25,50,1)*10, N_0 = 25,ncores = 10)
 save(amis_mod, file = "./sims/lasso/amis_lasso.Rdata")
 
 ### IS
+set.seed(1)
 is_mod = inlaIS(data = df, init = list(mu = rep(0,n.beta), cov = 4*stdev.samp),
                           prior.beta, dq.beta, rq.beta, fit.inla, N_0 = 800, N = 10000,ncores = 10)
 save(is_mod, file = "./sims/lasso/is_lasso.Rdata")
@@ -119,6 +121,7 @@ rq.beta <- function(x, sigma = stdev.samp) {
   as.vector(rmvnorm(1, mean = x, sigma = sigma))
   #rmvt(1,sigma = sigma, df=3, delta = x, type = "shifted")
 }
+set.seed(1)
 mcmc_mod = inlaMH(data = df, init = list(mu = rep(x=0,ncol(df$x)),cov = stdev.samp),
                               prior.beta, dq.beta, rq.beta, fit.inla,
                               n.samples = 10500, n.burnin = 500, n.thin = 1)

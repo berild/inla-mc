@@ -52,14 +52,14 @@ dq.beta <- function(y, theta = init, t = 1, log =TRUE) {
 }
 
 ### AMIS
-
+set.seed(1)
 amis_mod <- inlaAMIS(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla,
                                N_t = seq(25,50)*10, N_0 = 250,ncores = 10)
 save(amis_mod, file = "./sims/toy/toy-amis.Rdata")
 
 ### IS
-
+set.seed(1)
 is_mod <- inlaIS(data = df, init = init, prior.beta,
                            dq.beta, rq.beta, fit.inla, N_0 = 800, N = 10000,ncores = 10)
 save(is_mod, file = "./sims/toy/toy-is.Rdata")
@@ -76,7 +76,7 @@ dq.beta <- function(y, x, sigma = .75, log =TRUE) {
 
 # initial state MCMC
 init = list(mu = c(0,0),cov = 0.5*diag(2))
-
+set.seed(1)
 mcmc_mod <- inlaMH(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla, n.samples = 10500, n.burnin = 500, n.thin = 1)
 save(mcmc_w_inla_mod, file = "./sims/toy/toy-mcmc.Rdata")

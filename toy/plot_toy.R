@@ -1,10 +1,10 @@
 library(ggplot2)
 library(ggpubr)
-load("./sims/toy/toy-is.Rdata")
-load("./sims/toy/toy-inla.Rdata")
-load("./sims/toy/toy-amis.Rdata")
-load("./sims/toy/toy-mcmc.Rdata")
-source("./genFuncs.R")
+source("./inlaMC/inlaMC.R")
+load("./sims/toy/is_toy.Rdata")
+load("./sims/toy/inla_toy.Rdata")
+load("./sims/toy/amis_toy.Rdata")
+load("./sims/toy/mcmc_toy.Rdata")
 
 p1 <- ggplot() +
   geom_line(data = amis_w_inla_mod$margs$intercept, aes(x=x,y=y, linetype = "A")) +

@@ -90,6 +90,7 @@ lidar$range = lidar$range/r_max
 
 
 # running amis with inla on lidar data
+set.seed(1)
 amis_mod = inlaAMIS(data = lidar, init = init, prior.param,
                               dq.param, rq.param, fit.inla.rw2,
                               N_t = seq(25,50,1)*10, N_0 = 250,ncores = 10)
@@ -98,6 +99,7 @@ amis_w_inla_mod$scale = c(r_max,r_min)
 save(amis_w_inla_mod, file = "./sims/pqr/amis_pqr_rw2.Rdata")
 
 # running is with inla on lidar data
+set.seed(1)
 is_mod = inlaIS(data = lidar, init = init, prior.param,
                           dq.param, rq.param, fit.inla.rw2,
                           N_0 = 800, N = 10000,ncores = 10)
@@ -115,6 +117,7 @@ rq.param.mcmc  <- function(x, sigma = init$cov) {
   as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
 # running mcmc with inla on lidar data
+set.seed(1)
 mcmc_mod <- inlaMH(data = lidar, init = init_mcmc,
                                prior.param, dq.param.mcmc, rq.param.mcmc, fit.inla.rw2,
                                n.samples = 10500, n.burnin = 500, n.thin = 1)
