@@ -11,8 +11,8 @@ library(RColorBrewer)
 # sourcing INLA-IS, INLA-AMIS and INLA-MH code
 source("./inlaMC/inlaMC.R")
 
-# Load data
-load("./data/load_data.RData")
+# Load data from https://github.com/becarioprecario/SAC_INLABMA/blob/master/load_data.RData
+load("./sem/load_data.RData")
 library(INLA)
 
 
@@ -72,24 +72,24 @@ rq.rho.lambda <- function(theta = init) {
 
 # AMIS-INLA
 set.seed(1)
-amis_w_inla_mod <- amis.w.inla(data = turnout, init = init, prior.rho.lambda,
+amis_mod <- inlaAMIS(data = turnout, init = init, prior.rho.lambda,
                                dq.rho.lambda, rq.rho.lambda, fit.inla,
                                N_t = seq(25,50,1)*10, N_0 = 250)
-save(amis_w_inla_mod, file = "./sims/sem/amis_sem.Rdata")
+save(amis_mod, file = "./sims/sem/amis_sem.Rdata")
 # approximating densities with the weighted set of samples
-eta_kern_amis = kde2d.weighted(x = amis_w_inla_mod$eta[,1], y = amis_w_inla_mod$eta[,2], w = amis_w_inla_mod$weight/(sum(amis_w_inla_mod$weight)), n = 100, lims = c(-1,1,-1,1))
-amis_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_amis$x, y=eta_kern_amis$y), z=as.vector(eta_kern_amis$z))
-save(amis_w_inla_mod, file = "./sims/sem/amis_sem.Rdata")
+eta_kern_amis = kde2d.weighted(x = amis_mod$eta[,1], y = amis_mod$eta[,2], w = amis_mod$weight/(sum(amis_mod$weight)), n = 100, lims = c(-1,1,-1,1))
+amis_mod$eta_kern = data.frame(expand.grid(x=eta_kern_amis$x, y=eta_kern_amis$y), z=as.vector(eta_kern_amis$z))
+save(amis_mod, file = "./sims/sem/amis_sem.Rdata")
 
 # IS-INLA
 set.seed(1)
-is_w_inla_mod <- is.w.inla(data = turnout, init = init, prior.rho.lambda,
+is_mod <- inlaIS(data = turnout, init = init, prior.rho.lambda,
                            dq.rho.lambda, rq.rho.lambda,fit.inla, N_0 = 800, N = 10000)
-save(is_w_inla_mod, file = "./sims/sem/is_sem.Rdata")
+save(is_mod, file = "./sims/sem/is_sem.Rdata")
 # approximating densities with the weighted set of samples
-eta_kern_is = kde2d.weighted(x = is_w_inla_mod$eta[,1], y = is_w_inla_mod$eta[,2], w = is_w_inla_mod$weight/(sum(is_w_inla_mod$weight)), n = 100, lims = c(-1,1,-1,1))
-is_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_is$x, y=eta_kern_is$y), z=as.vector(eta_kern_is$z))
-save(is_w_inla_mod, file = "./sims/sem/is_sem.Rdata")
+eta_kern_is = kde2d.weighted(x = is_mod$eta[,1], y = is_mod$eta[,2], w = is_mod$weight/(sum(is_mod$weight)), n = 100, lims = c(-1,1,-1,1))
+is_mod$eta_kern = data.frame(expand.grid(x=eta_kern_is$x, y=eta_kern_is$y), z=as.vector(eta_kern_is$z))
+save(is_mod, file = "./sims/sem/is_sem.Rdata")
 
 
 # initial state and proposal distribution for MCMC with INLA
@@ -102,17 +102,18 @@ dq.rho.lambda <- function(y, x, sigma = init$cov, log =TRUE) {
 rq.rho.lambda <- function(x, sigma = init$cov) {
   as.vector(rmvnorm(1, mean = x, sigma = sigma))
 }
-
-mcmc_mod <- inlaMH(data = turnout, init = init,
+set.seed(1)
+inlaMH_mod <- inlaMH(data = turnout, init = init,
                                prior.rho.lambda, dq.rho.lambda, rq.rho.lambda, fit.inla,
                                n.samples = 10500, n.burnin = 500, n.thin = 1)
-save(mcmc_mod, file = "./sims/sem/mcmc_sem.Rdata")
+save(inlaMH_mod, file = "./sims/sem/mcmc_sem.Rdata")
 # approximating densities with samples
-eta_kern_mcmc = kde2d.weighted(x = mcmc_w_inla_mod$eta[,1], y = mcmc_w_inla_mod$eta[,2], w = rep(1,nrow(mcmc_w_inla_mod$eta))/nrow(mcmc_w_inla_mod$eta), n = 100, lims = c(-1,1,-1,1))
-mcmc_w_inla_mod$eta_kern = data.frame(expand.grid(x=eta_kern_mcmc$x, y=eta_kern_mcmc$y), z=as.vector(eta_kern_mcmc$z))
-save(mcmc_w_inla_mod, file = "./sims/sem/mcmc_sem.Rdata")
+eta_kern_mcmc = kde2d.weighted(x = inlaMH_mod$eta[,1], y = inlaMH_mod$eta[,2], w = rep(1,nrow(inlaMH_mod$eta))/nrow(inlaMH_mod$eta), n = 100, lims = c(-1,1,-1,1))
+inlaMH_mod$eta_kern = data.frame(expand.grid(x=eta_kern_mcmc$x, y=eta_kern_mcmc$y), z=as.vector(eta_kern_mcmc$z))
+save(inlaMH_mod, file = "./sims/sem/mcmc_sem.Rdata")
 
 # running mcmc simulation on the dataset using spatialreg package
+set.seed(1)
 mcmc_mod <- spBreg_sac(TURNOUT01 ~ log(GDPCAP), data = as.data.frame(turnout),
                        listw = it.lw, control = list(ndraw = 110000L, nomit = 10000L, thin = 10L,
                                                      prior = list(nu = 0.01, d0 = 0.01, a1 = 1, a2 = 1,
