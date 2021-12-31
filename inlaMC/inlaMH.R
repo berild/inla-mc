@@ -50,11 +50,10 @@ inlaMH <- function(data, init, prior, d.prop, r.prop, fit.inla,
   eta = eta[seq(from = 1, to = nrow(eta), by=n.thin),]
   res$eta = eta
   res$times = times
-  res$mlik = mlik
   res$acc.vec = acc.vec
   res$margs = lapply(margs, function(x){fit.marginals(rep(1,nrow(eta)),x)})
   if (kde){
-    kde_mc(res$eta,rep(1,nrow(eta)))
+    res$eta_kern = kde_mc(res$eta,rep(1,nrow(eta)))
   }
   return(res)
 }
