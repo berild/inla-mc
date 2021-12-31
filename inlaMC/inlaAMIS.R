@@ -128,7 +128,7 @@ inlaAMIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_t = seq(25,5
   res$times = times
   res$theta = theta
   res$weight = exp(weight - max(weight))
-  res$mod=data
+  res$mod = data
   res$dists = margs
   res$margs = lapply(margs, function(x){fit.marginals(res$weight,x)})
   if (kde){
