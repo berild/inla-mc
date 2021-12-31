@@ -25,7 +25,7 @@ inlaIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = NA, N = 40
   times = numeric(N)
   res = list()
   margs = NA
-  n_eta = length(r.prop(theta))
+  n_eta = length(r.prop(theta[[1]]))
   if (anyNA(N_0)){
     pb <- txtProgressBar(min = 0, max = N, style = 3)
     theta[[2]] = init
