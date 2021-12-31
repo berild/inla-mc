@@ -28,7 +28,7 @@ inits.jags <- list(
 
 
 # Fit model using JAGS (for checking)
-jm <- jags.model("cluster.bug",
+jm <- jags.model("./pois_mix/cluster.bug",
   data = list(y = earthquake$number, n = nrow(earthquake)),
   inits = inits.jags
 )
@@ -47,7 +47,7 @@ apply(js$mu[ , ,1], 1, sd)
 
 
 # save results
-save(file = "sims/pois-mix/mcmc_pois_mix.RData", list = c("jm", "js"))
+save(file = "./sims/pois-mix/mcmc_pois_mix.RData", list = c("jm", "js"))
 
 #Summary 
 apply(js$mu, 1, mean)
