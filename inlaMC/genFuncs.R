@@ -147,10 +147,12 @@ calc.post.sd <- function(eta,ws=NA){
 running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
   if (anyNA(ws)){
     require(coda)
-    ess = sapply(lapply(seq(2,nrow(eta)),function(x){
+    sekv = rev(seq(length(times),100,-step))
+    ess = sapply(lapply(sekv,function(x){
       coda::effectiveSize(eta[1:x,])
     }),min)
-    times = times[-1]
+    ess.df = data.frame(time = c(times[1],times[sekv]),
+                        ess = c(min(coda::effectiveSize(eta[1:2,])),ess))
   }else{
     if (norm){
       ws = ws/sum(ws)
@@ -161,9 +163,10 @@ running.ESS <- function(eta, times, ws = NA, norm = TRUE,step = 100){
     rm.ess = !is.na(ess)
     times = times[rm.ess]
     ess = ess[rm.ess]
+    ess.df = data.frame(time = c(times[1],times[rev(seq(length(times),100,-step))]),
+                        ess = c(ess[1],ess[rev(seq(length(ess),100,-step))]))
   }
-  ess.df = data.frame(time = c(times[1],times[rev(seq(length(times),100,-step))]),
-                      ess = c(ess[1],ess[rev(seq(length(ess),100,-step))]))
+  
   return(ess.df)
 }
 
