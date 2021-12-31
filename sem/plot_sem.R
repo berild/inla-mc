@@ -4,6 +4,11 @@ load("./sims/sem/sem-amis-w-inla.Rdata")
 load("./sims/sem/sem-is-w-inla.Rdata")
 load("./sims/sem/sem-mcmc-w-inla.Rdata")
 load("./sims/sem/sem-mcmc.Rdata")
+
+# Need to add plotting here
+# KDE!
+
+
 gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
   hcl(h = hues, l = 65, c = 100)[1:n]

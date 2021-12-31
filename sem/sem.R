@@ -2,12 +2,12 @@ library(spdep)
 library(spData)
 library(spatialreg)
 library(parallel)
+library(INLABMA)
 library(mvtnorm)
 library(MASS)
 library(coda)
 library(rgdal)
 library(sp)
-library(RColorBrewer)
 # sourcing INLA-IS, INLA-AMIS and INLA-MH code
 source("./inlaMC/inlaMC.R")
 
@@ -72,23 +72,16 @@ rq.rho.lambda <- function(theta = init) {
 
 # AMIS-INLA
 set.seed(1)
-amis_mod <- inlaAMIS(data = turnout, init = init, prior.rho.lambda,
-                               dq.rho.lambda, rq.rho.lambda, fit.inla,
+inlaAMIS()
+amis_mod <- inlaAMIS(data = turnout, init = init, prior = prior.rho.lambda,
+                               d.prop = dq.rho.lambda, r.prop = rq.rho.lambda, fit.inla,
                                N_t = seq(25,50,1)*10, N_0 = 250)
-save(amis_mod, file = "./sims/sem/amis_sem.Rdata")
-# approximating densities with the weighted set of samples
-eta_kern_amis = kde2d.weighted(x = amis_mod$eta[,1], y = amis_mod$eta[,2], w = amis_mod$weight/(sum(amis_mod$weight)), n = 100, lims = c(-1,1,-1,1))
-amis_mod$eta_kern = data.frame(expand.grid(x=eta_kern_amis$x, y=eta_kern_amis$y), z=as.vector(eta_kern_amis$z))
 save(amis_mod, file = "./sims/sem/amis_sem.Rdata")
 
 # IS-INLA
 set.seed(1)
 is_mod <- inlaIS(data = turnout, init = init, prior.rho.lambda,
                            dq.rho.lambda, rq.rho.lambda,fit.inla, N_0 = 800, N = 10000)
-save(is_mod, file = "./sims/sem/is_sem.Rdata")
-# approximating densities with the weighted set of samples
-eta_kern_is = kde2d.weighted(x = is_mod$eta[,1], y = is_mod$eta[,2], w = is_mod$weight/(sum(is_mod$weight)), n = 100, lims = c(-1,1,-1,1))
-is_mod$eta_kern = data.frame(expand.grid(x=eta_kern_is$x, y=eta_kern_is$y), z=as.vector(eta_kern_is$z))
 save(is_mod, file = "./sims/sem/is_sem.Rdata")
 
 
@@ -106,11 +99,7 @@ set.seed(1)
 inlaMH_mod <- inlaMH(data = turnout, init = init,
                                prior.rho.lambda, dq.rho.lambda, rq.rho.lambda, fit.inla,
                                n.samples = 10500, n.burnin = 500, n.thin = 1)
-save(inlaMH_mod, file = "./sims/sem/mcmc_sem.Rdata")
-# approximating densities with samples
-eta_kern_mcmc = kde2d.weighted(x = inlaMH_mod$eta[,1], y = inlaMH_mod$eta[,2], w = rep(1,nrow(inlaMH_mod$eta))/nrow(inlaMH_mod$eta), n = 100, lims = c(-1,1,-1,1))
-inlaMH_mod$eta_kern = data.frame(expand.grid(x=eta_kern_mcmc$x, y=eta_kern_mcmc$y), z=as.vector(eta_kern_mcmc$z))
-save(inlaMH_mod, file = "./sims/sem/mcmc_sem.Rdata")
+save(inlaMH_mod, file = "./sims/sem/inlaMH_sem.Rdata")
 
 # running mcmc simulation on the dataset using spatialreg package
 set.seed(1)
