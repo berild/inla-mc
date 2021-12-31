@@ -83,6 +83,7 @@ prior.beta <- function(x, mu = 0, lambda = 0.073, log = TRUE) {
 
   return(res)
 }
+
 # initial parameters of the proposal distribution
 init = list(mu = rep(0,n.beta), cov = 4*stdev.samp)
 # proposal distribution
