@@ -94,7 +94,6 @@ set.seed(1)
 amis_mod = inlaAMIS(data = lidar, init = init, prior.param,
                               dq.param, rq.param, fit.inla.rw2,
                               N_t = seq(25,50,1)*10, N_0 = 250,ncores = 10)
-amis_mod$mod = lidar
 amis_mod$scale = c(r_max,r_min)
 save(amis_mod, file = "./sims/pqr/amis_pqr_rw2.Rdata")
 
@@ -103,7 +102,6 @@ set.seed(1)
 is_mod = inlaIS(data = lidar, init = init, prior.param,
                           dq.param, rq.param, fit.inla.rw2,
                           N_0 = 800, N = 10000,ncores = 10)
-is_mod$mod = lidar
 is_mod$scale = c(r_max,r_min)
 save(is_mod, file = "./sims/pqr/is_pqr_rw2.Rdata")
 
@@ -121,15 +119,6 @@ set.seed(1)
 mcmc_mod <- inlaMH(data = lidar, init = init_mcmc,
                                prior.param, dq.param.mcmc, rq.param.mcmc, fit.inla.rw2,
                                n.samples = 10500, n.burnin = 500, n.thin = 1)
-save(mcmc_mod, file = "./sims/pqr/mcmc_pqr_rw2.Rdata")
-eta_kern_mcmc = kde2d.weighted(x = mcmc_mod$eta[,1], y = mcmc_mod$eta[,2], w = rep(1,nrow(mcmc_mod$eta))/nrow(mcmc_mod$eta), n = 100, lims = c(-1,1,-1,1))
-mcmc_mod$eta_kern_joint = data.frame(expand.grid(x=eta_kern_mcmc$x, y=eta_kern_mcmc$y), z=as.vector(eta_kern_mcmc$z))
-mcmc_mod$eta_kerns= lapply(seq(ncol(mcmc_mod$eta)), function(x){
-  as.data.frame(density(x = mcmc_mod$eta[,x],
-                        weights = rep(1/length(mcmc_mod$eta[,x]),length(mcmc_mod$eta[,x])),
-                        kernel = "gaussian")[c(1,2)])
-})
-mcmc_mod$mod = lidar
 mcmc_mod$scale = c(r_max,r_min)
 save(mcmc_mod, file = "./sims/pqr/mcmc_pqr_rw2.Rdata")
 
