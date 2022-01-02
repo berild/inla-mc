@@ -65,6 +65,7 @@ inlaIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = NA, N = 40
   res$times = times
   res$theta = theta
   res$weight = exp(weight - max(weight))
+  res$mod = data
   res$dists = res$margs
   res$margs = lapply(margs, function(x){fit.marginals(res$weight,x)})
   if (kde){

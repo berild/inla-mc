@@ -50,6 +50,7 @@ inlaMH <- function(data, init, prior, d.prop, r.prop, fit.inla,
   eta = eta[seq(from = 1, to = nrow(eta), by=n.thin),]
   res$eta = eta
   res$times = times
+  res$mod = data
   res$acc.vec = acc.vec
   res$margs = lapply(margs, function(x){fit.marginals(rep(1,nrow(eta)),x)})
   if (kde){
