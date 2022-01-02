@@ -2,7 +2,7 @@
 library("INLA")
 
 # IS results
-load("pois-mix/is_pois_mix.Rdata")
+load("./sims/pois-mix/is_pois_mix.Rdata")
 
 # Weights
 ww <- is_mod$weight / sum(is_mod$weight)
@@ -19,7 +19,7 @@ inla.zmarginal(inla.tmarginal(exp, is_mod$margs[[1]]))
 inla.zmarginal(inla.tmarginal(exp, is_mod$margs[[2]]))
 
 # AMIS results
-load("pois-mix/amis_pois_mix.Rdata")
+load("./sims/pois-mix/amis_pois_mix.Rdata")
 
 # Weights
 ww <- amis_mod$weight / sum(amis_mod$weight)
