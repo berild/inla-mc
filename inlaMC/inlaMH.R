@@ -19,8 +19,8 @@ inlaMH <- function(data, init, prior, d.prop, r.prop, fit.inla,
     INLA_crash = T
     while(INLA_crash){
       tryCatch({
-        eta.new = r.prop(eta[i-1,], sigma = init[[2]])
-        mod.new = fit.inla(data = data,eta = eta.new)
+        eta.new = r.prop(eta[i-1,], init[[2]])
+        mod.new = fit.inla(data,eta.new)
         INLA_crash = F
       },error=function(e){
       },finally={})
