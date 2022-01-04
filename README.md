@@ -15,6 +15,7 @@ In this repository, we have included the code for the respective examples presen
 * Imputation of missing covariates (<a href="https://github.com/berild/inla-mc/blob/master/missing/missing.R">script</a>, <a href="https://github.com/berild/inla-mc/blob/master/missing/plot_missing.R">plotting</a>)
 * Model-aware Parametric Quantile Regression (<a href="https://github.com/berild/inla-mc/blob/master/pqr/pqr.R">script</a>, <a href="https://github.com/berild/inla-mc/blob/master/pqr/plot_pqr.R">diagnostics</a>)
 
+Furthermore, as some of the examples are time consuming to run, the results from all our examples are available in the <a href="https://github.com/berild/inla-mc/blob/master/sims/">sims</a> folder and the respective figures are available in the <a href="https://github.com/berild/inla-mc/blob/master/figures/">figures</a> folder.
 
 ## Genral Usage
 To fit a conditional latent Gaussian model with our implementation of the INLA within Monte Carlo methods, a specific function call is required in the respective methods. This call includes the data (`data`), and initial parameters of the proposal distribution (`init = list(x = ... , sigma = ...)`) which could be a mean and covariance matrix but can be anything. The methods also requires some functions as input. The first is the prior (`prior()`) of the parameters being conditioned on $z_c$
