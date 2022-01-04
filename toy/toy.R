@@ -25,13 +25,11 @@ save(inla_mod, file = "./sims/toy/inla-toy.Rdata")
 
 # inla function fitting conditional LGMs in the combined methods
 fit.inla <- function(data, eta){
-  data$oset = data$x%*%t(eta)
+  data$oset = data$x%*%eta
   res = inla(y~1+offset(oset), data = data)
   return(list(mlik = res$mlik[1],
               dists = list(intercept = res$marginals.fixed[[1]], 
-                           tau = res$marginals.hyperpar[[1]]),
-              stats = list(intercept = as.numeric(res$summary.fixed[1]),
-                           tau  = as.numeric(res$summary.hyperpar[1]))))
+                           tau = res$marginals.hyperpar[[1]])))
 }
 
 # the prior for the beta parameters
@@ -44,7 +42,7 @@ init = list(mu = c(0,0),cov = diag(5,2,2))
 
 # proposal distribution in AMIS and IS
 rq.beta <- function(theta = init) {
-  rmvnorm(1,mean=theta[[1]],sigma = theta[[2]])
+  as.vector(rmvnorm(1,mean=theta[[1]],sigma = theta[[2]]))
 }
 
 dq.beta <- function(y, theta = init, t = 1, log =TRUE) {
@@ -55,7 +53,7 @@ dq.beta <- function(y, theta = init, t = 1, log =TRUE) {
 set.seed(1)
 amis_mod <- inlaAMIS(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla,
-                               N_t = seq(25,50)*10, N_0 = 250,ncores = 10,kde = T)
+                               N_t = seq(25,50)*1, N_0 = 2,ncores = 10,kde = T)
 save(amis_mod, file = "./sims/toy/amis_toy.Rdata")
 
 ### IS
@@ -75,7 +73,7 @@ dq.beta <- function(y, x, sigma = .75, log =TRUE) {
 }
 
 # initial state MCMC
-init = list(mu = c(0,0),cov = 0.5*diag(2))
+init = list(c(0,0), .75)
 set.seed(1)
 mcmc_mod <- inlaMH(data = df, init = init, prior.beta,
                                dq.beta, rq.beta, fit.inla, n.samples = 10500, n.burnin = 500, n.thin = 1, kde=T)
