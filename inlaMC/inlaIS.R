@@ -41,7 +41,7 @@ inlaIS <- function(data, init, prior, d.prop, r.prop, fit.inla, N_0 = NA, N = 40
       setTxtProgressBar(pb, i)
       eta[i,]= is.list[[i]]$eta
       weight[i] = is.list[[i]]$weight
-      margs = store.post(is.list[[i]]$dists,margs,i,N)
+      margs = store.post(is.list[[i]]$dists,margs,i,N_0)
     }
     theta[[2]] = calc.theta(list(weight,eta,margs),N_0)
   }
