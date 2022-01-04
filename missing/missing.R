@@ -50,11 +50,11 @@ prior.x.mis <- function(x, mu = mean(d.mis$bmi, na.rm = TRUE),
 # proposal distribution
 ## evaluate
 dq.x.mis <- function(y, theta=init, log =TRUE) {
-  sum(dnorm(y, mean = theta[[1]], sd = sqrt(5), log = log))
+  dmvnorm(y, mean = theta[[1]], sigma = theta[[2]], log = log)
 }
 ## sample
 rq.x.mis <- function(theta=init) {
-  rnorm(length(init[[1]]), mean = theta[[1]], sd = sqrt(5))
+  as.vector(rmvnorm(1, mean = theta[[1]], sigma = theta[[2]]))
 }
 
 ### AMIS
@@ -72,7 +72,17 @@ save(is_mod, file = "./sims/missing/is_missing.Rdata")
 
 ### MCMC
 set.seed(1)
-mcmc_mod <- inlaMH(data = df, init =init,
+# proposal distribution
+## evaluate
+dq.x.mis <- function(y, eta, sigma=sqrt(5), log =TRUE) {
+  sum(dnorm(y, mean = eta, sd = sigma, log = log))
+}
+## sample
+rq.x.mis <- function(eta,sigma=sqrt(5)) {
+  rnorm(length(eta), mean = eta, sd = sigma)
+}
+init = list(rep(mean(df$d.mis$bmi, na.rm = TRUE),n.mis), sqrt(5))
+mcmc_mod <- inlaMH(data = df, init = init,
                                prior.x.mis, dq.x.mis, rq.x.mis, fit.inla,
                                n.samples = 10500, n.burnin = 500, n.thin = 1)
 save(mcmc_mod, file = "./sims/missing/mcmc_missing.Rdata")
