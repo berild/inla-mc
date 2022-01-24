@@ -119,7 +119,7 @@ mcmc_mod$margs = lapply(seq(ncol(mcmc_mod$samples)), function(x){
                         kernel = "gaussian")[c(1,2)])
 })
 names(mcmc_mod$margs) = names(mcmc_mod$samples)
-save(mcmc_mod,file = "./sims/sem/sem-mcmc.Rdata")
+save(mcmc_mod,file = "./sims/sem/mcmc_sem.Rdata")
 
 
 
